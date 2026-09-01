@@ -1,3 +1,8 @@
 WallConnectorLog.xcodeproj
 .DS_Store
 build/
+fastlane/.env
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
