@@ -1,6 +1,5 @@
 name: WallConnectorLog
 options:
-  bundleIdPrefix: se.mews
   deploymentTarget:
     iOS: "18.0"
   createIntermediateGroups: true
@@ -14,6 +13,7 @@ targets:
       - Resources/Assets.xcassets
     settings:
       base:
+        PRODUCT_BUNDLE_IDENTIFIER: se.mews.wallconnectorlog
         SWIFT_VERSION: "5.9"
         MARKETING_VERSION: "0.1"
         CURRENT_PROJECT_VERSION: "1"
