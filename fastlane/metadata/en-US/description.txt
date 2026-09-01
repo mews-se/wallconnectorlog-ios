@@ -1,0 +1,28 @@
+Your Tesla Wall Connector keeps no history of its own. WallConnectorLog is the app for the people who gave it one — a phone-sized window into the WallConnectorLog server, the free and open-source logger that watches the charger around the clock.
+
+The app talks only to a server you run yourself. It never connects to Tesla, there is no account to create, and nothing leaves your network.
+
+LIVE
+• The grid, the charger and the car in one picture that lights up green where energy is moving
+• Power while charging, the state the charger reports, and the running session
+• Phase currents and voltages, handle and electronics temperatures, the charger's Wi-Fi signal and the grid readings
+• A power chart over the last day
+
+SESSIONS
+• The real charge sessions the server has derived — month by month, every plug-in
+• Energy, duration, charging time, peak power, peak handle temperature and average grid voltage for each session
+• A power curve for recent sessions
+
+LIFETIME
+• The counters the charger has kept since it was installed: energy delivered, charging time, connector and contactor cycles, thermal foldbacks and uptime
+
+TRY IT FIRST
+• No server yet? Type demo in the server field and every screen runs on built-in example data
+
+WHAT YOU NEED
+• A WallConnectorLog server on your network — two files, docker-compose.yml and .env, are the whole install
+• The server reachable from your phone
+
+WallConnectorLog is free and open source under the MIT licence — no ads, no tracking, no analytics, nothing to buy. It is a sibling of EVLog, the same developer's TeslaMate companion.
+
+This app is an unofficial community tool and is not affiliated with, endorsed by, or supported by Tesla, Inc.

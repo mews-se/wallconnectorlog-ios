@@ -1,0 +1,1 @@
+tesla,wall connector,charger,charging,ev,charge log,home charging,wallbox,gen 3
