@@ -4,6 +4,8 @@ import UIKit
 struct AboutView: View {
     private static let developer = "Martin Stockzell (mews-se)"
 
+    @AppStorage("serverURL") private var serverURL = ""
+
     // the icon exactly as shipped, read from the bundle so the page never drifts
     // from the home screen. the catalog compiles it under the names listed in
     // CFBundleIcons - asking for "AppIcon" itself comes back empty
@@ -73,6 +75,10 @@ struct AboutView: View {
                 } label: {
                     Label("License", systemImage: "doc.plaintext")
                 }
+
+                LinkRow(icon: "gift", title: "Donate",
+                        detail: "If you feel like giving back",
+                        url: "https://mews-se.github.io/wallconnectorlog-site/donate/")
             } header: {
                 Text("Open source")
             } footer: {
@@ -80,9 +86,25 @@ struct AboutView: View {
             }
 
             Section {
-                LinkRow(icon: "ev.charger.fill", title: "WallConnectorLog server",
-                        detail: "Logs your Wall Connector around the clock",
-                        url: "https://github.com/mews-se/wallconnectorlog")
+                // the row opens the server's own dashboard - its code is already
+                // one step away through Source code above
+                if !Server.isDemo(serverURL), let base = Server.baseURL(serverURL) {
+                    LinkRow(icon: "ev.charger.fill", title: "WallConnectorLog server",
+                            detail: base.absoluteString, url: base.absoluteString)
+                } else {
+                    HStack(spacing: 13) {
+                        Image(systemName: "ev.charger.fill")
+                            .font(.subheadline)
+                            .foregroundStyle(.tint)
+                            .frame(width: 22)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("WallConnectorLog server")
+                            Text("No server configured")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
             } header: {
                 Text("Data source")
             } footer: {
