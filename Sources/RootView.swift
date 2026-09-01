@@ -35,7 +35,7 @@ struct OnboardingView: View {
             AppIconImage()
             Text("WallConnectorLog")
                 .font(.largeTitle.bold())
-            Text("A phone-sized window into the charge log your WallConnectorLog server keeps around the clock.")
+            Text("Your WallConnectorLog server logs the charger around the clock. The app is its phone-sized window.")
                 .multilineTextAlignment(.center)
                 .foregroundStyle(.secondary)
             TextField("Server address", text: $draft, prompt: Text(verbatim: "10.0.1.11:4680"))
