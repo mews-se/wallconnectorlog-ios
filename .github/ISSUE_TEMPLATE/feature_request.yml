@@ -1,0 +1,30 @@
+name: Feature request
+description: Suggest something the app should be able to do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        WallConnectorLog reads your own server and never talks to the charger
+        or to Tesla, so anything needing a Tesla login or control of the
+        charger is out of scope. See CONTRIBUTING.md for what fits.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What should the app do
+      description: Describe it from your side, and what you would use it for. The situation you are in when you reach for it decides more than the feature itself.
+    validations:
+      required: true
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Where would the data come from, if you know
+      description: |
+        The app only shows what the server has logged — the live reading, the
+        derived sessions and the sample history. If the server does not log
+        it yet, the feature starts in the server repo rather than here, and
+        that is a fine place to ask too.
+    validations:
+      required: false

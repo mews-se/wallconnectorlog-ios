@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Setup help and common questions
+    url: https://mews-se.github.io/wallconnectorlog-site/support/
+    about: What the app needs to run, why a session's times can look odd, and how to reach me by email.
+  - name: The WallConnectorLog server itself
+    url: https://github.com/mews-se/wallconnectorlog
+    about: Problems with the logging, the derived sessions or the database belong there, not here.

@@ -1,0 +1,54 @@
+name: Bug report
+description: Something in the app behaves wrong or does not work
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Screenshots from this app can contain your server address, your
+        charger's serial number and your Wi-Fi network name. Crop or blur
+        them if you would rather keep those private.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What the app did, and what you expected instead.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: screen
+    attributes:
+      label: Where in the app
+      options:
+        - Overview
+        - Sessions
+        - A session's details
+        - Settings
+        - About
+        - The start screen
+        - Somewhere else, or everywhere
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: WallConnectorLog version
+      description: Shown at the top of Settings → About WallConnectorLog.
+      placeholder: 0.1 (1)
+    validations:
+      required: true
+
+  - type: textarea
+    id: anything-else
+    attributes:
+      label: Anything else
+      description: |
+        Whatever you happen to know. Useful if you have it: your iPhone and
+        iOS version, the server version, whether the server's own web page
+        shows the same thing, and how to reproduce it. If it happens in demo
+        mode too, say so — that is the fastest kind to chase.
+    validations:
+      required: false
