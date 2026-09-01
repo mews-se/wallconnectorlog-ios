@@ -13,6 +13,10 @@ The server does the around-the-clock logging; the app is a phone-sized window in
 only to a server you run yourself. It never connects to Tesla, there is no account to create, and
 nothing leaves your network.
 
+WallConnectorLog is a sibling of [EVLog](https://github.com/mews-se/evlog-ios), the same
+developer's TeslaMate companion — one app for the car, one for the charger, built the same way:
+your own server, no accounts, no cloud.
+
 The app is not on the App Store yet — this repository holds the work in progress. New work
 gathers on `dev`, and `main` will hold store builds once there are any.
 
