@@ -1,0 +1,36 @@
+name: WallConnectorLog
+options:
+  bundleIdPrefix: se.mews
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+  developmentLanguage: en
+targets:
+  WallConnectorLog:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+      - Resources/Assets.xcassets
+    settings:
+      base:
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "0.1"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_CFBundleDisplayName: WallConnectorLog
+        INFOPLIST_KEY_UIUserInterfaceStyle: Automatic
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 4S9Z57Q8KR
+    info:
+      path: Resources/Info.plist
+      properties:
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen: {}
+        ITSAppUsesNonExemptEncryption: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: WallConnectorLog reads charging data from your WallConnectorLog server on the local network.
