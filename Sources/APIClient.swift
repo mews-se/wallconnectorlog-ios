@@ -13,17 +13,47 @@ enum Server {
         raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == "demo"
     }
 
-    // Accepts a bare host, host:port or a pasted URL; a missing port gets the
-    // server's default 4680.
+    // Accepts a bare host, host:port or a pasted URL. A typed scheme is kept,
+    // and a missing port then means that scheme's default. Without a scheme a
+    // local address keeps plain http and the server's 4680, while any other
+    // name is taken to sit behind a proxy with a certificate: https, no port.
     static func baseURL(_ raw: String) -> URL? {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !s.isEmpty else { return nil }
-        if !s.contains("://") { s = "http://" + s }
-        guard var parts = URLComponents(string: s), parts.host?.isEmpty == false else { return nil }
-        if parts.port == nil { parts.port = 4680 }
+        let typedScheme = s.contains("://")
+        if !typedScheme { s = "http://" + s }
+        guard var parts = URLComponents(string: s), let host = parts.host, !host.isEmpty else {
+            return nil
+        }
+        if !typedScheme && parts.port == nil {
+            if isLocal(host) {
+                parts.port = 4680
+            } else {
+                parts.scheme = "https"
+            }
+        }
         parts.path = ""
         parts.query = nil
+        parts.fragment = nil
         return parts.url
+    }
+
+    // The addresses NSAllowsLocalNetworking lets plain http reach: private and
+    // loopback IPv4 ranges, link-local, .local names and single-label names.
+    // IPv6 literals are treated as local too; nobody exposes a charger on one.
+    static func isLocal(_ host: String) -> Bool {
+        let h = host.lowercased()
+        if h == "localhost" || h.hasSuffix(".local") || !h.contains(".") || h.contains(":") {
+            return true
+        }
+        let octets = h.split(separator: ".").compactMap { UInt8($0) }
+        guard octets.count == 4 else { return false }
+        switch (octets[0], octets[1]) {
+        case (10, _), (127, _), (169, 254), (192, 168), (172, 16...31):
+            return true
+        default:
+            return false
+        }
     }
 
     static func make(_ raw: String) -> (any WCLApi)? {

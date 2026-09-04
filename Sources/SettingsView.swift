@@ -46,7 +46,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Server")
                 } footer: {
-                    Text("The address of your WallConnectorLog server, like 10.0.1.11:4680. No server yet? Type demo to look around with sample data.")
+                    Text("The address of your WallConnectorLog server: 10.0.1.11:4680 on your own network, or a name like charger.example.com if it sits behind HTTPS. No server yet? Type demo to look around with sample data.")
                 }
                 Section("About") {
                     NavigationLink("About WallConnectorLog") { AboutView() }

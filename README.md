@@ -57,6 +57,10 @@ word away.
 The app allows plain HTTP to your own network: private addresses such as 192.168.x.x and 10.x.x.x,
 `.local` names, and hostnames without a dot. That covers a LAN and a VPN alike.
 
+A public name behind a reverse proxy with a real certificate works as well: type it without a
+scheme and the app uses HTTPS on the standard port. A typed `http://` or `https://` is kept, with
+that scheme's default port unless you give one.
+
 ## Building
 
 The Xcode project is generated rather than committed, so a fresh clone has no `.xcodeproj` until

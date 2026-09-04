@@ -45,7 +45,7 @@ struct OnboardingView: View {
                 .padding(12)
                 .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                 .onSubmit { connect() }
-            Text("No server yet? Type demo to look around with sample data.")
+            Text("An address on your own network like 10.0.1.11:4680, or a name behind HTTPS. No server yet? Type demo to look around with sample data.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
