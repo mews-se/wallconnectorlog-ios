@@ -190,9 +190,23 @@ private struct FlowCard: View {
                 FlowLine(active: true, height: 20)
                 ChargerGlyph(charging: live.charging)
                 FlowLine(active: live.charging, height: 26)
+                // Struck through while nothing is plugged in, the way the system
+                // slashes its own symbols: a card-coloured gap under a grey stroke.
                 Image(systemName: "car.side.fill")
                     .font(.system(size: 42))
                     .foregroundStyle(carColor)
+                    .overlay {
+                        if !live.connected {
+                            Capsule()
+                                .fill(Color(.secondarySystemGroupedBackground))
+                                .frame(width: 68, height: 9)
+                                .rotationEffect(.degrees(-35))
+                            Capsule()
+                                .fill(Color(.systemGray2))
+                                .frame(width: 68, height: 3.5)
+                                .rotationEffect(.degrees(-35))
+                        }
+                    }
             }
             if live.charging {
                 Text(verbatim: Fmt.kw(live.powerW))
