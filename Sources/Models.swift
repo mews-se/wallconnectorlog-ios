@@ -108,6 +108,10 @@ struct HistoryPoint: Decodable, Sendable {
     var pcbaC: Double? = nil
     var mcuC: Double? = nil
     var contactorClosed: Int? = nil
+    // Only the per-session samples endpoint carries the phases.
+    var ampA: Double? = nil
+    var ampB: Double? = nil
+    var ampC: Double? = nil
 
     enum CodingKeys: String, CodingKey {
         case ts
@@ -119,6 +123,9 @@ struct HistoryPoint: Decodable, Sendable {
         case pcbaC = "pcba_c"
         case mcuC = "mcu_c"
         case contactorClosed = "contactor_closed"
+        case ampA = "amp_a"
+        case ampB = "amp_b"
+        case ampC = "amp_c"
     }
 
     var date: Date { Date(timeIntervalSince1970: TimeInterval(ts)) }
@@ -165,6 +172,21 @@ enum JSONValue: Decodable, Sendable {
         if case .number(let value) = self { return value }
         return nil
     }
+}
+
+// One failed poll of the charger, as the server logged it.
+struct PollError: Decodable, Sendable {
+    var ts: Int
+    var detail: String
+
+    var date: Date { Date(timeIntervalSince1970: TimeInterval(ts)) }
+}
+
+// What Settings shows to tell a healthy server from a stalled or drifted one.
+struct Diagnostics: Sendable {
+    var live: Live
+    var serverClock: Date?
+    var lastError: PollError?
 }
 
 // The server's own pointer to Grafana: a bare ":3399" that follows the server's

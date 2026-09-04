@@ -54,6 +54,14 @@ enum Fmt {
         return "\(s / 3600) h"
     }
 
+    // "12 s", "3 min", "2 h 05 min": how long ago something happened.
+    static func age(_ s: Int) -> String {
+        if s < 60 { return "\(s) s" }
+        let minutes = s / 60
+        if minutes < 60 { return "\(minutes) min" }
+        return "\(minutes / 60) h \(String(format: "%02d", minutes % 60)) min"
+    }
+
     static func days(_ s: Int?) -> String {
         guard let s else { return "–" }
         return "\(s / 86_400) days"

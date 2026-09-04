@@ -183,6 +183,12 @@ struct SessionDetailView: View {
                         TemperatureChart(points: curve)
                             .frame(height: 150)
                     }
+                    if curve.contains(where: { $0.ampA != nil }) {
+                        Card(title: "Phase currents") {
+                            PhaseChart(points: curve)
+                                .frame(height: 150)
+                        }
+                    }
                 }
             }
             .padding(.horizontal)
@@ -193,10 +199,15 @@ struct SessionDetailView: View {
         .task { await loadCurve() }
     }
 
-    // The history endpoint only reaches back from now, so the curve is shown
-    // for recent sessions and skipped for old ones instead of pulling weeks of
-    // samples.
+    // Server 1.2 serves every stored sample of a session, phases included. An
+    // older server has only the rolling history, which reaches back from now,
+    // so there the curve is limited to recent sessions instead of pulling
+    // weeks of samples.
     private func loadCurve() async {
+        if let points = try? await api.sessionSamples(id: session.id) {
+            curve = points
+            return
+        }
         let age = Int(Date().timeIntervalSince1970) - session.startedAt
         let hours = age / 3600 + 1
         guard hours <= 48 else { return }
@@ -239,6 +250,40 @@ struct TemperatureChart: View {
         // would flatten every curve into a line.
         .chartYScale(domain: .automatic(includesZero: false))
         .chartYAxisLabel("°C")
+        .chartLegend(position: .bottom, spacing: 8)
+    }
+}
+
+// The current on each phase, so a single-phase charge is told apart from a
+// three-phase one at a glance.
+struct PhaseChart: View {
+    let points: [HistoryPoint]
+
+    private static let phases: [(name: String, key: KeyPath<HistoryPoint, Double?>, color: Color)] = [
+        ("Phase A", \.ampA, .cyan),
+        ("Phase B", \.ampB, .orange),
+        ("Phase C", \.ampC, .purple),
+    ]
+
+    var body: some View {
+        let slim = points.decimated(to: 500)
+        Chart {
+            ForEach(Self.phases, id: \.name) { phase in
+                ForEach(slim, id: \.ts) { point in
+                    if let value = point[keyPath: phase.key] {
+                        LineMark(
+                            x: .value("Time" as String, point.date),
+                            y: .value("A" as String, value),
+                            series: .value("Phase" as String, phase.name)
+                        )
+                        .foregroundStyle(by: .value("Phase" as String, phase.name))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5))
+                    }
+                }
+            }
+        }
+        .chartForegroundStyleScale(domain: Self.phases.map(\.name), range: Self.phases.map(\.color))
+        .chartYAxisLabel("A")
         .chartLegend(position: .bottom, spacing: 8)
     }
 }

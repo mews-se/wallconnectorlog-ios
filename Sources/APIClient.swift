@@ -5,6 +5,8 @@ protocol WCLApi: Sendable {
     func live() async throws -> Live
     func sessions() async throws -> [ChargeSession]
     func history(hours: Int) async throws -> [HistoryPoint]
+    func sessionSamples(id: Int) async throws -> [HistoryPoint]
+    func diagnostics() async throws -> Diagnostics
 }
 
 enum Server {
@@ -91,15 +93,30 @@ struct HTTPApi: WCLApi {
     }()
 
     private func get<T: Decodable>(_ path: String) async throws -> T {
+        try await fetch(path).value
+    }
+
+    // The response's Date header is the server's clock: the one honest way to
+    // see a server whose clock drifted, since every timestamp it logs is local.
+    private func fetch<T: Decodable>(_ path: String) async throws -> (value: T, serverDate: Date?) {
         guard let url = URL(string: path, relativeTo: base) else {
             throw URLError(.badURL)
         }
         let (data, response) = try await Self.session.data(from: url)
-        guard (response as? HTTPURLResponse)?.statusCode == 200 else {
+        guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
             throw URLError(.badServerResponse)
         }
-        return try JSONDecoder().decode(T.self, from: data)
+        let stamp = http.value(forHTTPHeaderField: "Date").flatMap(Self.httpDate.date(from:))
+        return (try JSONDecoder().decode(T.self, from: data), stamp)
     }
+
+    private static let httpDate: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.timeZone = TimeZone(secondsFromGMT: 0)
+        f.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        return f
+    }()
 
     func live() async throws -> Live {
         try await get("/api/live")
@@ -111,5 +128,16 @@ struct HTTPApi: WCLApi {
 
     func history(hours: Int) async throws -> [HistoryPoint] {
         try await get("/api/history?hours=\(min(max(hours, 1), 720))")
+    }
+
+    // Server 1.2 and later; older servers answer 404 and the caller falls back.
+    func sessionSamples(id: Int) async throws -> [HistoryPoint] {
+        try await get("/api/sessions/\(id)/samples")
+    }
+
+    func diagnostics() async throws -> Diagnostics {
+        let (live, stamp): (Live, Date?) = try await fetch("/api/live")
+        let errors: [PollError] = (try? await get("/api/errors")) ?? []
+        return Diagnostics(live: live, serverClock: stamp, lastError: errors.first)
     }
 }

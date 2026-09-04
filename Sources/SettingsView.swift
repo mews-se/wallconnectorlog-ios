@@ -10,6 +10,10 @@ struct SettingsView: View {
     @State private var grafanaDraft = ""
     @State private var testResult: TestResult?
     @State private var testing = false
+    @State private var diagnostics: Diagnostics?
+    @State private var diagnosticsError: String?
+    // when the diagnostics were read, so the ages below are honest
+    @State private var readAt = Date()
 
     enum TestResult {
         case ok(String)
@@ -61,6 +65,39 @@ struct SettingsView: View {
                 } footer: {
                     Text("Leave empty when Grafana runs next to the server: the app follows the server's own link, 10.0.1.11:3399 for a server at 10.0.1.11:4680. Give a name or URL when Grafana sits behind its own HTTPS name.")
                 }
+                Section {
+                    if let d = diagnostics {
+                        let age = Int(readAt.timeIntervalSince1970) - (d.live.ts ?? Int(readAt.timeIntervalSince1970))
+                        LabeledContent("Last reading") {
+                            Text(verbatim: Fmt.age(max(0, age)) + " ago")
+                                .foregroundStyle(age > Self.staleAfter ? .orange : .secondary)
+                        }
+                        LabeledContent("Server clock") {
+                            Text(verbatim: clockText(d.serverClock))
+                                .foregroundStyle(clockOff(d.serverClock) ? .orange : .secondary)
+                        }
+                        LabeledContent("Last poll error") {
+                            if let e = d.lastError {
+                                Text(verbatim: Fmt.age(max(0, Int(readAt.timeIntervalSince(e.date)))) + " ago · " + e.detail)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(3)
+                                    .multilineTextAlignment(.trailing)
+                            } else {
+                                Text("None")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    } else if let diagnosticsError {
+                        Label(diagnosticsError, systemImage: "xmark.circle.fill")
+                            .foregroundStyle(.red)
+                    } else {
+                        ProgressView()
+                    }
+                } header: {
+                    Text("Diagnostics")
+                } footer: {
+                    Text("The logger polls every 5 to 60 seconds, so a reading older than a few minutes means it has stopped. A server clock off by more than a minute skews the session times it records.")
+                }
                 Section("About") {
                     NavigationLink("About WallConnectorLog") { AboutView() }
                 }
@@ -70,7 +107,41 @@ struct SettingsView: View {
                 draft = serverURL
                 grafanaDraft = grafanaURL
             }
+            .task { await readDiagnostics() }
+            .refreshable { await readDiagnostics() }
             .onDisappear { commit() }
+        }
+    }
+
+    // Three poll intervals at the idle cadence: beyond this the logger is not
+    // just slow, it has stopped.
+    private static let staleAfter = 180
+
+    private func clockText(_ server: Date?) -> String {
+        guard let server else { return "Not reported" }
+        let delta = Int(server.timeIntervalSince(readAt).rounded())
+        if abs(delta) < 5 { return "In sync" }
+        return Fmt.age(abs(delta)) + (delta > 0 ? " ahead" : " behind")
+    }
+
+    private func clockOff(_ server: Date?) -> Bool {
+        guard let server else { return false }
+        return abs(server.timeIntervalSince(readAt)) > 60
+    }
+
+    private func readDiagnostics() async {
+        guard let api = Server.make(serverURL) else {
+            diagnosticsError = "No server configured"
+            return
+        }
+        do {
+            let d = try await api.diagnostics()
+            readAt = Date()
+            diagnostics = d
+            diagnosticsError = nil
+        } catch {
+            diagnostics = nil
+            diagnosticsError = error.localizedDescription
         }
     }
 

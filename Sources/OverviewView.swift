@@ -29,6 +29,10 @@ struct OverviewView: View {
                             Label("The server cannot reach the charger right now", systemImage: "antenna.radiowaves.left.and.right.slash")
                                 .font(.footnote)
                                 .foregroundStyle(.orange)
+                        } else if let ts = live.ts, Int(Date().timeIntervalSince1970) - ts > 180 {
+                            Label("Last reading \(Fmt.age(Int(Date().timeIntervalSince1970) - ts)) old — has the logger stopped?", systemImage: "clock.badge.exclamationmark")
+                                .font(.footnote)
+                                .foregroundStyle(.orange)
                         }
                         tiles(live)
                         PowerChartCard(points: history, hours: $chartHours)
@@ -190,6 +194,11 @@ private struct FlowCard: View {
                     .font(.system(size: 44, weight: .bold, design: .rounded))
                     .foregroundStyle(.green)
                     .contentTransition(.numericText())
+                if let phases = phaseSummary {
+                    Text(verbatim: phases)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.secondary)
+                }
             } else {
                 Text(verbatim: live.evseStateText ?? "–")
                     .font(.title3.weight(.semibold))
@@ -215,6 +224,16 @@ private struct FlowCard: View {
         }
         .font(.footnote.weight(.medium))
         .foregroundStyle(.secondary)
+    }
+
+    // How many phases carry current and how much: "3 phases · 16 A" during a
+    // three-phase charge, "1 phase · 15 A" when the car pulls single-phase.
+    // Idle phases read a few tenths of an amp of noise, hence the 1 A floor.
+    private var phaseSummary: String? {
+        guard let v = live.vitals else { return nil }
+        let amps = [v.currentA, v.currentB, v.currentC].compactMap { $0 }.filter { $0 >= 1 }
+        guard let peak = amps.max() else { return nil }
+        return "\(amps.count) \(amps.count == 1 ? "phase" : "phases") · \(Fmt.amps(peak, decimals: 0))"
     }
 
     private var carColor: Color {
@@ -405,6 +424,7 @@ private struct LifetimeCard: View {
             VStack(spacing: 8) {
                 CardRow(title: "Energy delivered", value: Fmt.kwh(lifetime.energyWh))
                 CardRow(title: "Charging time", value: Fmt.wholeHours(lifetime.chargingTimeS))
+                CardRow(title: "Charge starts", value: Fmt.count(lifetime.chargeStarts))
                 CardRow(title: "Connector cycles", value: Fmt.count(lifetime.connectorCycles))
                 CardRow(title: "Contactor cycles", value: Fmt.count(lifetime.contactorCycles))
                 CardRow(title: "Cycles under load", value: Fmt.count(lifetime.cyclesLoaded))

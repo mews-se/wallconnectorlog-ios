@@ -103,6 +103,26 @@ struct DemoApi: WCLApi {
     // Power follows the generated sessions, so a session's own curve and the
     // overview chart tell the same story. A closed session draws current for
     // its charging time and then sits plugged in; the open one is charging now.
+    func sessionSamples(id: Int) async throws -> [HistoryPoint] {
+        guard let s = try await sessions().first(where: { $0.id == id }) else { return [] }
+        let end = s.endedAt ?? now
+        let hours = (now - s.startedAt) / 3600 + 1
+        return try await history(hours: hours)
+            .filter { $0.ts >= s.startedAt - 60 && $0.ts <= end + 60 }
+            .map { point in
+                var p = point
+                let charging = (point.contactorClosed ?? 0) == 1
+                p.ampA = charging ? 16.0 : 0.2
+                p.ampB = charging ? 16.0 : 0.4
+                p.ampC = charging ? 16.1 : 0.0
+                return p
+            }
+    }
+
+    func diagnostics() async throws -> Diagnostics {
+        Diagnostics(live: try await live(), serverClock: Date(), lastError: nil)
+    }
+
     func history(hours: Int) async throws -> [HistoryPoint] {
         let windows = try await sessions().map { s in
             (s.startedAt, s.open ? now : s.startedAt + (s.chargeS ?? 0))
