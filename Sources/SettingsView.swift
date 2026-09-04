@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @AppStorage("serverURL") private var serverURL = ""
     @AppStorage("grafanaURL") private var grafanaURL = ""
+    @AppStorage("pricePerKwh") private var pricePerKwh = 0.0
+    @State private var priceDraft = ""
 
     // The field edits a draft and commits on Done/submit, never per keystroke -
     // a keystroke-live binding rebuilds the view tree under the keyboard.
@@ -66,6 +68,15 @@ struct SettingsView: View {
                     Text("Leave empty when Grafana runs next to the server: the app follows the server's own link, 10.0.1.11:3399 for a server at 10.0.1.11:4680. Give a name or URL when Grafana sits behind its own HTTPS name.")
                 }
                 Section {
+                    TextField("Price per kWh", text: $priceDraft, prompt: Text(verbatim: "0"))
+                        .keyboardType(.decimalPad)
+                        .onChange(of: priceDraft) { pricePerKwh = Self.price(from: priceDraft) }
+                } header: {
+                    Text("Cost")
+                } footer: {
+                    Text("Your price per kWh, in your own currency. Set it and the statistics and session details show what each charge cost; leave it at 0 to hide cost.")
+                }
+                Section {
                     if let d = diagnostics {
                         let age = Int(readAt.timeIntervalSince1970) - (d.live.ts ?? Int(readAt.timeIntervalSince1970))
                         LabeledContent("Last reading") {
@@ -106,11 +117,21 @@ struct SettingsView: View {
             .onAppear {
                 draft = serverURL
                 grafanaDraft = grafanaURL
+                priceDraft = pricePerKwh > 0
+                    ? pricePerKwh.formatted(.number.precision(.fractionLength(0...4)).grouping(.never))
+                    : ""
             }
             .task { await readDiagnostics() }
             .refreshable { await readDiagnostics() }
             .onDisappear { commit() }
         }
+    }
+
+    // "2,5" and "2.5" mean the same price whatever separator the keyboard
+    // offers, so the field is parsed by hand instead of by locale.
+    static func price(from text: String) -> Double {
+        let cleaned = text.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: ",", with: ".")
+        return max(0, Double(cleaned) ?? 0)
     }
 
     // Three poll intervals at the idle cadence: beyond this the logger is not

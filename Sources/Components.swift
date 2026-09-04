@@ -19,6 +19,9 @@ struct StatTile: View {
     let value: String
     var tint: Color = .primary
     var valueTint: Color?
+    // A second line under the value for a figure that belongs to it, like
+    // the cost of an amount of energy.
+    var detail: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -33,8 +36,13 @@ struct StatTile: View {
                 .foregroundStyle(valueTint ?? .primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
+            if let detail {
+                Text(verbatim: detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
     }

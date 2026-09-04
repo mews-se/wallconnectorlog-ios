@@ -12,6 +12,9 @@ struct RootView: View {
                 Tab("Sessions", systemImage: "bolt.fill") {
                     SessionsView(api: api)
                 }
+                Tab("Statistics", systemImage: "chart.bar.fill") {
+                    StatsView(api: api)
+                }
                 Tab("Settings", systemImage: "gearshape.fill") {
                     SettingsView()
                 }

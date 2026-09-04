@@ -62,6 +62,13 @@ enum Fmt {
         return "\(minutes / 60) h \(String(format: "%02d", minutes % 60)) min"
     }
 
+    // Cost in the phone's currency. The price is whatever the user typed per
+    // kWh, so this is only ever as right as that number.
+    static func money(_ amount: Double) -> String {
+        let code = Locale.current.currency?.identifier ?? "SEK"
+        return amount.formatted(.currency(code: code).precision(.fractionLength(0...2)))
+    }
+
     static func days(_ s: Int?) -> String {
         guard let s else { return "–" }
         return "\(s / 86_400) days"

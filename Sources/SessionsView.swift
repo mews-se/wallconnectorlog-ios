@@ -139,6 +139,7 @@ struct SessionDetailView: View {
     let api: any WCLApi
     let session: ChargeSession
 
+    @AppStorage("pricePerKwh") private var pricePerKwh = 0.0
     @State private var curve: [HistoryPoint] = []
 
     // Plugged in without drawing current: what is left of the plugged-in time
@@ -158,7 +159,8 @@ struct SessionDetailView: View {
             VStack(spacing: 12) {
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
                     StatTile(icon: "bolt.fill", title: "Energy",
-                             value: Fmt.kwh(session.energyWh), tint: .green, valueTint: .green)
+                             value: Fmt.kwh(session.energyWh), tint: .green, valueTint: .green,
+                             detail: pricePerKwh > 0 ? Fmt.money((session.energyWh ?? 0) / 1000 * pricePerKwh) : nil)
                     StatTile(icon: "clock", title: "Plugged in",
                              value: Fmt.duration(session.durationS), tint: .secondary)
                     StatTile(icon: "bolt.badge.clock", title: "Charging",
