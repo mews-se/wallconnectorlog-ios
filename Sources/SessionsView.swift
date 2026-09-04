@@ -179,6 +179,10 @@ struct SessionDetailView: View {
                         PowerChart(points: curve)
                             .frame(height: 150)
                     }
+                    Card(title: "Temperature") {
+                        TemperatureChart(points: curve)
+                            .frame(height: 150)
+                    }
                 }
             }
             .padding(.horizontal)
@@ -199,5 +203,42 @@ struct SessionDetailView: View {
         guard let points = try? await api.history(hours: hours) else { return }
         let end = session.endedAt ?? Int(Date().timeIntervalSince1970)
         curve = points.filter { $0.ts >= session.startedAt - 60 && $0.ts <= end + 60 }
+    }
+}
+
+// The three sensors the charger reports, on the same time axis as the power
+// curve so a warm handle can be read against the load that caused it.
+struct TemperatureChart: View {
+    let points: [HistoryPoint]
+
+    private static let sensors: [(name: String, key: KeyPath<HistoryPoint, Double?>, color: Color)] = [
+        ("Handle", \.handleC, .teal),
+        ("PCBA", \.pcbaC, .orange),
+        ("MCU", \.mcuC, .pink),
+    ]
+
+    var body: some View {
+        let slim = points.decimated(to: 500)
+        Chart {
+            ForEach(Self.sensors, id: \.name) { sensor in
+                ForEach(slim, id: \.ts) { point in
+                    if let value = point[keyPath: sensor.key] {
+                        LineMark(
+                            x: .value("Time" as String, point.date),
+                            y: .value("°C" as String, value),
+                            series: .value("Sensor" as String, sensor.name)
+                        )
+                        .foregroundStyle(by: .value("Sensor" as String, sensor.name))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5))
+                    }
+                }
+            }
+        }
+        .chartForegroundStyleScale(domain: Self.sensors.map(\.name), range: Self.sensors.map(\.color))
+        // Temperatures move within a narrow band; anchoring the axis at zero
+        // would flatten every curve into a line.
+        .chartYScale(domain: .automatic(includesZero: false))
+        .chartYAxisLabel("°C")
+        .chartLegend(position: .bottom, spacing: 8)
     }
 }
