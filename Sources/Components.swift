@@ -1,5 +1,18 @@
 import SwiftUI
 
+// The icon exactly as shipped, read from the bundle so no view drifts from the
+// home screen. The catalog compiles it under the names listed in CFBundleIcons;
+// asking for "AppIcon" itself comes back empty.
+enum AppIcon {
+    static let image: UIImage? = {
+        guard let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
+              let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
+              let files = primary["CFBundleIconFiles"] as? [String],
+              let name = files.last else { return nil }
+        return UIImage(named: name)
+    }()
+}
+
 struct StatTile: View {
     let icon: String
     let title: String

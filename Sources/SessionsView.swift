@@ -49,9 +49,22 @@ struct SessionsView: View {
                 }
             }
             .navigationTitle("Sessions")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    ShareLink(item: SessionsCSV(sessions: sessions), preview: sharePreview) {
+                        Label("Export CSV", systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(sessions.isEmpty)
+                }
+            }
             .refreshable { await load() }
             .task { await load() }
         }
+    }
+
+    private var sharePreview: SharePreview<Image, Never> {
+        let icon = AppIcon.image.map(Image.init(uiImage:)) ?? Image(systemName: "bolt.fill")
+        return SharePreview("WallConnectorLog sessions", image: icon)
     }
 
     struct MonthGroup: Identifiable {

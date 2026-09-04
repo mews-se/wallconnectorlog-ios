@@ -9,16 +9,6 @@ struct AboutView: View {
     // one reading of /api/live, for the server's own Grafana pointer
     @State private var live: Live?
 
-    // the icon exactly as shipped, read from the bundle so the page never drifts
-    // from the home screen. the catalog compiles it under the names listed in
-    // CFBundleIcons - asking for "AppIcon" itself comes back empty
-    private static let appIcon: UIImage? = {
-        guard let icons = Bundle.main.infoDictionary?["CFBundleIcons"] as? [String: Any],
-              let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
-              let files = primary["CFBundleIconFiles"] as? [String],
-              let name = files.last else { return nil }
-        return UIImage(named: name)
-    }()
 
     private var version: String {
         let info = Bundle.main.infoDictionary
@@ -32,7 +22,7 @@ struct AboutView: View {
             Section {
                 VStack(spacing: 4) {
                     // 60 points is the compiled variant's own size - larger would upscale
-                    if let icon = Self.appIcon {
+                    if let icon = AppIcon.image {
                         Image(uiImage: icon)
                             .resizable()
                             .frame(width: 60, height: 60)

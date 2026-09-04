@@ -87,11 +87,7 @@ struct OnboardingView: View {
 // "AppIcon") is nil, the bundle carries it as AppIcon60x60.
 struct AppIconImage: View {
     var body: some View {
-        if let icons = Bundle.main.object(forInfoDictionaryKey: "CFBundleIcons") as? [String: Any],
-           let primary = icons["CFBundlePrimaryIcon"] as? [String: Any],
-           let files = primary["CFBundleIconFiles"] as? [String],
-           let name = files.last,
-           let image = UIImage(named: name) {
+        if let image = AppIcon.image {
             Image(uiImage: image)
                 .resizable()
                 .frame(width: 84, height: 84)
