@@ -77,12 +77,14 @@ struct DemoApi: WCLApi {
         var rows: [ChargeSession] = []
         let open = try await live().openSession
         if let open { rows.append(open) }
-        var day = 1
+        var day = 0
         var id = 40
         while day < 45 {
             let n = noise(id)
-            // Evening plug-ins two days out of three, sized like real home charging.
-            let start = now - day * 86_400 - Int(6.5 * 3600) + Int(n * 5_400)
+            // Plug-ins two days out of three, sized like real home charging. The
+            // newest one finished a few hours ago, so the 24 h chart shows it
+            // next to the charge in progress.
+            let start = now - day * 86_400 - 8 * 3600 + Int(n * 5_400)
             let energy = 4_000 + n * 38_000
             let duration = Int(energy / 11_000 * 3_600) + Int(n * 2_400)
             rows.append(ChargeSession(
@@ -98,19 +100,18 @@ struct DemoApi: WCLApi {
         return rows
     }
 
+    // Power follows the generated sessions, so a session's own curve and the
+    // overview chart tell the same story. A closed session draws current for
+    // its charging time and then sits plugged in; the open one is charging now.
     func history(hours: Int) async throws -> [HistoryPoint] {
+        let windows = try await sessions().map { s in
+            (s.startedAt, s.open ? now : s.startedAt + (s.chargeS ?? 0))
+        }
         var points: [HistoryPoint] = []
-        let sessionStart = now - 48 * 60
         let step = 120
         var ts = now - hours * 3600
         while ts <= now {
-            let inSession = ts >= sessionStart
-            // This morning's finished charge, so a 24 h window shows two humps.
-            let previous = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: TimeInterval(ts)))
-                .addingTimeInterval(7 * 3600)
-            let inPrevious = TimeInterval(ts) >= previous.timeIntervalSince1970
-                && TimeInterval(ts) <= previous.timeIntervalSince1970 + 2.6 * 3600
-            let charging = inSession || inPrevious
+            let charging = windows.contains { ts >= $0.0 && ts <= $0.1 }
             var p = HistoryPoint(ts: ts)
             p.powerW = charging ? 10_950 + noise(ts / step).rounded() * 180 : 0
             p.gridV = 229.5 + noise(ts / step) * 2
