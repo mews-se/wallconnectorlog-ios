@@ -6,6 +6,8 @@ struct OverviewView: View {
 
     @AppStorage("serverURL") private var serverURL = ""
     @AppStorage("grafanaURL") private var grafanaURL = ""
+    // The power chart's window, remembered between launches.
+    @AppStorage("chartHours") private var chartHours = ChartRange.day.rawValue
     @State private var live: Live?
     @State private var history: [HistoryPoint] = []
     @State private var error: String?
@@ -29,7 +31,8 @@ struct OverviewView: View {
                                 .foregroundStyle(.orange)
                         }
                         tiles(live)
-                        PowerChartCard(points: history)
+                        PowerChartCard(points: history, hours: $chartHours)
+                            .onChange(of: chartHours) { Task { await loadHistory() } }
                         if let lt = live.lifetime {
                             LifetimeCard(lifetime: lt)
                         }
@@ -134,7 +137,7 @@ struct OverviewView: View {
     private func load() async {
         do {
             let fresh = try await api.live()
-            async let points = api.history(hours: 24)
+            async let points = api.history(hours: chartHours)
             live = fresh
             history = (try? await points) ?? history
             reachable = true
@@ -144,6 +147,13 @@ struct OverviewView: View {
             if live == nil {
                 self.error = "Could not reach the server.\n\(error.localizedDescription)"
             }
+        }
+    }
+
+    // Only the chart window changed; the live card keeps its own cadence.
+    private func loadHistory() async {
+        if let points = try? await api.history(hours: chartHours) {
+            history = points
         }
     }
 }
@@ -242,11 +252,41 @@ private struct ChargerGlyph: View {
     }
 }
 
+// The windows the power chart can show. The server keeps 720 hours at most.
+enum ChartRange: Int, CaseIterable, Identifiable {
+    case day = 24
+    case week = 168
+    case month = 720
+
+    var id: Int { rawValue }
+
+    var label: String {
+        switch self {
+        case .day: "24 h"
+        case .week: "7 d"
+        case .month: "30 d"
+        }
+    }
+}
+
 private struct PowerChartCard: View {
     let points: [HistoryPoint]
+    @Binding var hours: Int
 
     var body: some View {
-        Card(title: "Power — last 24 h") {
+        Card {
+            HStack {
+                Text("Power")
+                    .font(.headline)
+                Spacer()
+                Picker("Range", selection: $hours) {
+                    ForEach(ChartRange.allCases) { range in
+                        Text(verbatim: range.label).tag(range.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 190)
+            }
             if points.count > 1 {
                 PowerChart(points: points)
                     .frame(height: 150)
