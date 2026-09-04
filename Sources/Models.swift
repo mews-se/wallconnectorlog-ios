@@ -174,6 +174,34 @@ enum JSONValue: Decodable, Sendable {
     }
 }
 
+// One reading of the charger's Wi-Fi link, taken every slow poll.
+struct WifiPoint: Decodable, Sendable {
+    var ts: Int
+    var rssi: Int? = nil
+    var snr: Int? = nil
+    var connected: Int? = nil
+    var internet: Int? = nil
+
+    var date: Date { Date(timeIntervalSince1970: TimeInterval(ts)) }
+}
+
+// The charger's lifetime counters as they stood at one point in time.
+struct LifetimeRow: Decodable, Sendable {
+    var ts: Int
+    var energyWh: Double? = nil
+    var chargeStarts: Int? = nil
+    var chargingTimeS: Int? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case ts
+        case energyWh = "energy_wh"
+        case chargeStarts = "charge_starts"
+        case chargingTimeS = "charging_time_s"
+    }
+
+    var date: Date { Date(timeIntervalSince1970: TimeInterval(ts)) }
+}
+
 // One failed poll of the charger, as the server logged it.
 struct PollError: Decodable, Sendable {
     var ts: Int

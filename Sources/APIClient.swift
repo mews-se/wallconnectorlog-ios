@@ -6,6 +6,8 @@ protocol WCLApi: Sendable {
     func sessions() async throws -> [ChargeSession]
     func history(hours: Int) async throws -> [HistoryPoint]
     func sessionSamples(id: Int) async throws -> [HistoryPoint]
+    func wifi(hours: Int) async throws -> [WifiPoint]
+    func lifetime(days: Int) async throws -> [LifetimeRow]
     func diagnostics() async throws -> Diagnostics
 }
 
@@ -122,8 +124,32 @@ struct HTTPApi: WCLApi {
         try await get("/api/live")
     }
 
+    // Walks the whole history newest first. Server 1.2 pages on `before`; an
+    // older server ignores the parameters and answers the same 200 rows every
+    // time, which the progress check turns into a single page.
     func sessions() async throws -> [ChargeSession] {
-        try await get("/api/sessions")
+        var all: [ChargeSession] = []
+        var before: Int?
+        for _ in 0..<25 {
+            let query = "/api/sessions?limit=\(Self.pageSize)" + (before.map { "&before=\($0)" } ?? "")
+            let page: [ChargeSession] = try await get(query)
+            guard let first = page.first, let last = page.last else { break }
+            if let before, first.id >= before { break }
+            all += page
+            if page.count < Self.pageSize { break }
+            before = last.id
+        }
+        return all
+    }
+
+    private static let pageSize = 200
+
+    func wifi(hours: Int) async throws -> [WifiPoint] {
+        try await get("/api/wifi?hours=\(min(max(hours, 1), 720))")
+    }
+
+    func lifetime(days: Int) async throws -> [LifetimeRow] {
+        try await get("/api/lifetime?days=\(min(max(days, 1), 366))")
     }
 
     func history(hours: Int) async throws -> [HistoryPoint] {

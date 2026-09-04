@@ -39,7 +39,7 @@ struct OverviewView: View {
                             .onChange(of: chartHours) { Task { await loadHistory() } }
                         GridQualityCard(points: history)
                         if let lt = live.lifetime {
-                            LifetimeCard(lifetime: lt)
+                            LifetimeCard(lifetime: lt, api: api)
                         }
                         if !api.isDemo,
                            let grafana = Server.grafanaURL(setting: grafanaURL, server: serverURL, live: live) {
@@ -98,12 +98,17 @@ struct OverviewView: View {
                 value: "\(Fmt.temp(v?.pcbaTempC)) / \(Fmt.temp(v?.mcuTempC))",
                 tint: .teal
             )
-            StatTile(
-                icon: "wifi",
-                title: live.deviceText("wifi_ssid") ?? "Wi-Fi",
-                value: live.deviceNumber("wifi_rssi").map { "\(Int($0)) dBm" } ?? "–",
-                tint: wifiTint(live.deviceNumber("wifi_rssi"))
-            )
+            NavigationLink {
+                WifiHistoryView(api: api)
+            } label: {
+                StatTile(
+                    icon: "wifi",
+                    title: live.deviceText("wifi_ssid") ?? "Wi-Fi",
+                    value: live.deviceNumber("wifi_rssi").map { "\(Int($0)) dBm" } ?? "–",
+                    tint: wifiTint(live.deviceNumber("wifi_rssi"))
+                )
+            }
+            .buttonStyle(.plain)
             StatTile(
                 icon: "powerplug.fill",
                 title: "Grid",
@@ -418,6 +423,7 @@ extension Array {
 
 private struct LifetimeCard: View {
     let lifetime: Lifetime
+    let api: any WCLApi
 
     var body: some View {
         Card(title: "Lifetime") {
@@ -431,6 +437,21 @@ private struct LifetimeCard: View {
                 CardRow(title: "Thermal foldbacks", value: Fmt.count(lifetime.thermalFoldbacks))
                 CardRow(title: "Alert counter", value: Fmt.count(lifetime.alertCount))
                 CardRow(title: "Uptime", value: Fmt.days(lifetime.uptimeS))
+                NavigationLink {
+                    LifetimeHistoryView(api: api)
+                } label: {
+                    HStack {
+                        Text("Charger counter vs logged energy")
+                            .foregroundStyle(.tint)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                    .font(.subheadline)
+                    .padding(.top, 4)
+                }
+                .buttonStyle(.plain)
             }
         }
     }

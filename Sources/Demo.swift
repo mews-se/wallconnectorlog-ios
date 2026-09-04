@@ -119,6 +119,45 @@ struct DemoApi: WCLApi {
             }
     }
 
+    func wifi(hours: Int) async throws -> [WifiPoint] {
+        var points: [WifiPoint] = []
+        var ts = now - hours * 3600
+        while ts <= now {
+            var p = WifiPoint(ts: ts)
+            // A garage link: mostly -60 dBm with a dip in the evening.
+            let hour = Calendar.current.component(.hour, from: p.date)
+            let dip = (19...22).contains(hour) ? 8.0 : 0.0
+            p.rssi = Int((-61 - dip - noise(ts / 300) * 4).rounded())
+            p.snr = Int((28 - dip / 2 - noise(ts / 300 + 7) * 3).rounded())
+            p.connected = 1
+            p.internet = 1
+            points.append(p)
+            ts += 300
+        }
+        return points
+    }
+
+    // The charger's counter grows with every generated session plus a little
+    // that the logger never saw, so the comparison view has a gap to show.
+    func lifetime(days: Int) async throws -> [LifetimeRow] {
+        let sessions = try await sessions().filter { !$0.open }
+        let total = sessions.reduce(0.0) { $0 + ($1.energyWh ?? 0) }
+        let base = 1_842_700 - total - Double(days) * 250
+        var rows: [LifetimeRow] = []
+        for d in stride(from: days - 1, through: 0, by: -1) {
+            let dayEnd = Calendar.current.startOfDay(for: Date(timeIntervalSince1970: TimeInterval(now - d * 86_400)))
+                .addingTimeInterval(86_399)
+            let ts = min(Int(dayEnd.timeIntervalSince1970), now)
+            let logged = sessions.filter { ($0.endedAt ?? now) <= ts }.reduce(0.0) { $0 + ($1.energyWh ?? 0) }
+            var row = LifetimeRow(ts: ts)
+            row.energyWh = base + logged + Double(days - d) * 250
+            row.chargeStarts = 512 - d
+            row.chargingTimeS = 361 * 3600 - d * 2_400
+            rows.append(row)
+        }
+        return rows
+    }
+
     func diagnostics() async throws -> Diagnostics {
         Diagnostics(live: try await live(), serverClock: Date(), lastError: nil)
     }
