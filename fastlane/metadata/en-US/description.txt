@@ -1,27 +1,40 @@
 Your Tesla Wall Connector keeps no history of its own. WallConnectorLog is the app for the people who gave it one — a phone-sized window into the WallConnectorLog server, the free and open-source logger that watches the charger around the clock.
 
-The app talks only to a server you run yourself. It never connects to Tesla, there is no account to create, and nothing leaves your network.
+The app talks only to a server you run yourself, on your own network or behind your own HTTPS name. It never connects to Tesla, there is no account to create, and nothing leaves your control.
 
 LIVE
-• The grid, the charger and the car in one picture that lights up green where energy is moving
+• The grid, the charger and the car in one picture that lights up green where energy is moving, and how many phases carry current
 • Power while charging, the state the charger reports, and the running session
 • Phase currents and voltages, handle and electronics temperatures, the charger's Wi-Fi signal and the grid readings
-• A power chart over the last day
+• A power chart over the last day, week or month, and the grid's voltage and frequency over the same span
+• The charger's Wi-Fi signal over time, one tap from the tile
 
 SESSIONS
-• The real charge sessions the server has derived — month by month, every plug-in
-• Energy, duration, charging time, peak power, peak handle temperature and average grid voltage for each session
-• A power curve for recent sessions
+• The real charge sessions the server has derived — month by month, every plug-in, with each month's total
+• Energy, time plugged in, charging time, idle time, peak power, peak handle temperature and average grid voltage for each session
+• Power, temperature and phase-current curves for every session
+• The whole list as a CSV file, through the share sheet
+
+STATISTICS
+• Totals for the week, the month, the year or all time: energy, sessions, charging time and average power
+• Energy per day for the last 30 days and per month for the last year
+• Records: the largest session, the longest charge, the highest power, and how much of the plugged-in time went idle
+• Give it your price per kWh and every total and session shows its cost
 
 LIFETIME
-• The counters the charger has kept since it was installed: energy delivered, charging time, connector and contactor cycles, thermal foldbacks and uptime
+• The counters the charger has kept since it was installed: energy delivered, charging time, charge starts, connector and contactor cycles, thermal foldbacks and uptime
+• The charger's own energy counter against what the server logged, month by month, so a gap in logging shows
+
+GRAFANA AND DIAGNOSTICS
+• Your server's Grafana dashboard one tap away, also when it sits behind a name of its own
+• The age of the last reading, the server's clock against the phone's, and the last poll error, so a stalled or drifting server is visible
 
 TRY IT FIRST
 • No server yet? Type demo in the server field and every screen runs on built-in example data
 
 WHAT YOU NEED
-• A WallConnectorLog server on your network — two files, docker-compose.yml and .env, are the whole install
-• The server reachable from your phone
+• A WallConnectorLog server — two files, docker-compose.yml and .env, are the whole install
+• The server reachable from your phone; server 1.2 or later for the per-session curves and the histories
 
 WallConnectorLog is free and open source under the MIT licence — no ads, no tracking, no analytics, nothing to buy. It is a sibling of EVLog, the same developer's TeslaMate companion.
 

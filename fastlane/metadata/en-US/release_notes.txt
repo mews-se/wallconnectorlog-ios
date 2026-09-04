@@ -1,0 +1,23 @@
+1.0 is the first proper release. 0.1 was a trial run to see how the app fared on the App Store; this is the version it was meant to be.
+
+What's new
+
+• A public HTTPS address works: type a name behind a reverse proxy and the app uses HTTPS on its own
+• Grafana one tap away, from the overview and from About, with an optional Grafana address in Settings
+• A Statistics tab: week, month and year totals, energy per day and per month, and your records
+• A price per kWh in Settings, and the cost of a month or a session next to its energy
+• Every session gets its power curve, plus temperature and phase-current curves
+• The overview's power chart shows 24 hours, 7 days or 30 days, with a grid quality card beneath it
+• Month totals in the session list, and the list as a CSV file through the share sheet
+• Idle time in each session: how long the car sat plugged in without charging
+• The Wi-Fi tile opens a signal history; the Lifetime card compares the charger's own counter with what was logged
+• Charge starts in the Lifetime card and the phase picture under the power figure
+• Diagnostics in Settings: the age of the last reading, the server's clock and the last poll error
+• The car is struck through while nothing is plugged in
+
+Bug fixes
+
+• The demo's earlier sessions draw a real power curve instead of a flat line
+
+Curves for every session, the Wi-Fi history and the counter comparison need WallConnectorLog server 1.2.
+Full story: https://mews-se.github.io/wallconnectorlog-site/changelog/

@@ -30,16 +30,29 @@ how, see [Building](#building).
 ## What it does
 
 **Overview** — the grid, the charger and the car in one picture that lights up green where energy
-is moving, with the state the charger reports, power while charging and the running session. Tiles
-for phase currents and voltages, handle and electronics temperatures, the charger's Wi-Fi signal
-and the grid, a power chart over the last day, and the lifetime counters: energy delivered,
-charging time, connector and contactor cycles, thermal foldbacks and uptime.
+is moving, with the state the charger reports, power while charging, the phases carrying current
+and the running session. Tiles for phase currents and voltages, handle and electronics
+temperatures, the charger's Wi-Fi signal and the grid; a power chart over the last day, week or
+month with a grid quality card beneath it; and the lifetime counters, with a comparison of the
+charger's own energy counter against what the server logged, month by month. The Wi-Fi tile opens
+the signal history.
 
-**Sessions** — the real charge sessions the server has derived, month by month, each with energy,
-duration, charging time, peak power, peak handle temperature and average grid voltage, and a power
-curve for recent sessions. This is the part a phone app cannot do on its own: the charger keeps no
-history, so an app that only samples while it is open can never show a truthful list. The server
-can, and does.
+**Sessions** — the real charge sessions the server has derived, month by month with each month's
+total, each with energy, time plugged in, charging time, idle time, peak power, peak handle
+temperature and average grid voltage, and power, temperature and phase-current curves. The list
+exports as CSV through the share sheet. This is the part a phone app cannot do on its own: the
+charger keeps no history, so an app that only samples while it is open can never show a truthful
+list. The server can, and does.
+
+**Statistics** — totals for the week, month, year or all time, energy per day for the last 30 days
+and per month for the last year, and the records: largest session, longest charge, highest power,
+average charging power and the idle share. With a price per kWh in Settings, cost sits next to
+every energy figure.
+
+**Settings** — the server address, on your own network or behind an HTTPS name; an optional
+Grafana address, followed automatically when Grafana runs next to the server; the price per kWh;
+and diagnostics: the age of the last reading, the server's clock against the phone's and the last
+poll error.
 
 **Demo mode** — with no server configured the app starts with a hint: type `demo` in the server
 field and every screen runs on built-in example data, so all of the above can be tried before
@@ -49,7 +62,9 @@ anything is set up.
 
 - A running [WallConnectorLog](https://github.com/mews-se/wallconnectorlog) server — two files,
   `docker-compose.yml` and `.env`, are the whole install; the README over there walks through it
-- The server reachable from your phone, by default on port `4680`
+- The server reachable from your phone, by default on port `4680`; server 1.2 or later for the
+  per-session curves, the Wi-Fi history and the counter comparison — everything else works with
+  any version
 
 The server address is the only thing the app asks for. Until one is in place the demo is a typed
 word away.
