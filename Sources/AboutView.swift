@@ -5,6 +5,9 @@ struct AboutView: View {
     private static let developer = "Martin Stockzell (mews-se)"
 
     @AppStorage("serverURL") private var serverURL = ""
+    @AppStorage("grafanaURL") private var grafanaURL = ""
+    // one reading of /api/live, for the server's own Grafana pointer
+    @State private var live: Live?
 
     // the icon exactly as shipped, read from the bundle so the page never drifts
     // from the home screen. the catalog compiles it under the names listed in
@@ -91,19 +94,16 @@ struct AboutView: View {
                 if !Server.isDemo(serverURL), let base = Server.baseURL(serverURL) {
                     LinkRow(icon: "ev.charger.fill", title: "WallConnectorLog server",
                             detail: base.absoluteString, url: base.absoluteString)
-                } else {
-                    HStack(spacing: 13) {
-                        Image(systemName: "ev.charger.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.tint)
-                            .frame(width: 22)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("WallConnectorLog server")
-                            Text("No server configured")
-                                .font(.footnote)
-                                .foregroundStyle(.secondary)
-                        }
+                    if let grafana = Server.grafanaURL(setting: grafanaURL, server: serverURL, live: live) {
+                        LinkRow(icon: "chart.xyaxis.line", title: "Graphs in Grafana",
+                                detail: grafana.absoluteString, url: grafana.absoluteString)
+                    } else if live != nil {
+                        PlainRow(icon: "chart.xyaxis.line", title: "Graphs in Grafana",
+                                 detail: "Set the address in Settings")
                     }
+                } else {
+                    PlainRow(icon: "ev.charger.fill", title: "WallConnectorLog server",
+                             detail: "No server configured")
                 }
             } header: {
                 Text("Data source")
@@ -116,6 +116,31 @@ struct AboutView: View {
         .contentMargins(.top, 8, for: .scrollContent)
         .navigationTitle("About WallConnectorLog")
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            guard !Server.isDemo(serverURL) else { return }
+            live = try? await Server.make(serverURL)?.live()
+        }
+    }
+}
+
+private struct PlainRow: View {
+    let icon: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(spacing: 13) {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundStyle(.tint)
+                .frame(width: 22)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(verbatim: title)
+                Text(verbatim: detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
     }
 }
 

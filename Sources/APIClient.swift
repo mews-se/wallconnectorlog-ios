@@ -17,7 +17,7 @@ enum Server {
     // and a missing port then means that scheme's default. Without a scheme a
     // local address keeps plain http and the server's 4680, while any other
     // name is taken to sit behind a proxy with a certificate: https, no port.
-    static func baseURL(_ raw: String) -> URL? {
+    static func baseURL(_ raw: String, defaultPort: Int = 4680) -> URL? {
         var s = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !s.isEmpty else { return nil }
         let typedScheme = s.contains("://")
@@ -27,7 +27,7 @@ enum Server {
         }
         if !typedScheme && parts.port == nil {
             if isLocal(host) {
-                parts.port = 4680
+                parts.port = defaultPort
             } else {
                 parts.scheme = "https"
             }
@@ -54,6 +54,24 @@ enum Server {
         default:
             return false
         }
+    }
+
+    // Where the graphs live. A typed address wins. Otherwise the server's own
+    // pointer from /api/live is followed the way its web page follows it - a
+    // bare port on the server's host, a full URL as it is - but never a bare
+    // port on an https server address: a proxy does not listen there, so that
+    // case needs the field.
+    static func grafanaURL(setting: String, server: String, live: Live?) -> URL? {
+        if !setting.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return baseURL(setting, defaultPort: 3399)
+        }
+        guard let hint = live?.grafana, hint.up == true, let raw = hint.url, !raw.isEmpty,
+              let base = baseURL(server) else { return nil }
+        if raw.contains("://") { return baseURL(raw, defaultPort: 3399) }
+        guard base.scheme == "http", let port = Int(raw.hasPrefix(":") ? String(raw.dropFirst()) : raw),
+              var parts = URLComponents(url: base, resolvingAgainstBaseURL: false) else { return nil }
+        parts.port = port
+        return parts.url
     }
 
     static func make(_ raw: String) -> (any WCLApi)? {

@@ -2,10 +2,12 @@ import SwiftUI
 
 struct SettingsView: View {
     @AppStorage("serverURL") private var serverURL = ""
+    @AppStorage("grafanaURL") private var grafanaURL = ""
 
     // The field edits a draft and commits on Done/submit, never per keystroke -
     // a keystroke-live binding rebuilds the view tree under the keyboard.
     @State private var draft = ""
+    @State private var grafanaDraft = ""
     @State private var testResult: TestResult?
     @State private var testing = false
 
@@ -48,20 +50,36 @@ struct SettingsView: View {
                 } footer: {
                     Text("The address of your WallConnectorLog server: 10.0.1.11:4680 on your own network, or a name like charger.example.com if it sits behind HTTPS. No server yet? Type demo to look around with sample data.")
                 }
+                Section {
+                    TextField("Address", text: $grafanaDraft, prompt: Text(verbatim: "Optional"))
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .onSubmit { commit() }
+                } header: {
+                    Text("Grafana")
+                } footer: {
+                    Text("Leave empty when Grafana runs next to the server: the app follows the server's own link, 10.0.1.11:3399 for a server at 10.0.1.11:4680. Give a name or URL when Grafana sits behind its own HTTPS name.")
+                }
                 Section("About") {
                     NavigationLink("About WallConnectorLog") { AboutView() }
                 }
             }
             .navigationTitle("Settings")
-            .onAppear { draft = serverURL }
+            .onAppear {
+                draft = serverURL
+                grafanaDraft = grafanaURL
+            }
             .onDisappear { commit() }
         }
     }
 
+    // An empty server field is ignored, an empty Grafana field means "follow
+    // the server", so that one is always written back.
     private func commit() {
         let trimmed = draft.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
-        serverURL = trimmed
+        if !trimmed.isEmpty { serverURL = trimmed }
+        grafanaURL = grafanaDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func test() async {

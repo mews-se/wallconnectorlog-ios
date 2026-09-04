@@ -4,6 +4,8 @@ import Charts
 struct OverviewView: View {
     let api: any WCLApi
 
+    @AppStorage("serverURL") private var serverURL = ""
+    @AppStorage("grafanaURL") private var grafanaURL = ""
     @State private var live: Live?
     @State private var history: [HistoryPoint] = []
     @State private var error: String?
@@ -30,6 +32,14 @@ struct OverviewView: View {
                         PowerChartCard(points: history)
                         if let lt = live.lifetime {
                             LifetimeCard(lifetime: lt)
+                        }
+                        if !api.isDemo,
+                           let grafana = Server.grafanaURL(setting: grafanaURL, server: serverURL, live: live) {
+                            Link(destination: grafana) {
+                                Label("Graphs in Grafana", systemImage: "chart.xyaxis.line")
+                                    .font(.subheadline.weight(.medium))
+                            }
+                            .padding(.top, 4)
                         }
                         chargerFooter(live)
                     }

@@ -167,6 +167,13 @@ enum JSONValue: Decodable, Sendable {
     }
 }
 
+// The server's own pointer to Grafana: a bare ":3399" that follows the server's
+// host, or a full URL the operator configured, plus whether it answered lately.
+struct GrafanaLink: Decodable, Sendable {
+    var url: String? = nil
+    var up: Bool? = nil
+}
+
 struct Live: Decodable, Sendable {
     var ts: Int? = nil
     var ok: Bool? = nil
@@ -177,9 +184,10 @@ struct Live: Decodable, Sendable {
     var device: [String: JSONValue]? = nil
     var openSession: ChargeSession? = nil
     var evseStateText: String? = nil
+    var grafana: GrafanaLink? = nil
 
     enum CodingKeys: String, CodingKey {
-        case ts, ok, error, vitals, lifetime, device
+        case ts, ok, error, vitals, lifetime, device, grafana
         case powerW = "power_w"
         case openSession = "open_session"
         case evseStateText = "evse_state_text"
