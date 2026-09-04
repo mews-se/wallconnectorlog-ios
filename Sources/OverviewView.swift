@@ -33,6 +33,7 @@ struct OverviewView: View {
                         tiles(live)
                         PowerChartCard(points: history, hours: $chartHours)
                             .onChange(of: chartHours) { Task { await loadHistory() } }
+                        GridQualityCard(points: history)
                         if let lt = live.lifetime {
                             LifetimeCard(lifetime: lt)
                         }
@@ -249,6 +250,71 @@ private struct ChargerGlyph: View {
                     .padding(.bottom, 10)
             }
             .frame(width: 50, height: 72)
+    }
+}
+
+// Grid voltage and frequency over the same window as the power chart: the
+// spread as numbers, the voltage as a curve. The charger reports the grid even
+// while idle, so this card always has something to say.
+private struct GridQualityCard: View {
+    let points: [HistoryPoint]
+
+    var body: some View {
+        let volts = points.compactMap(\.gridV).filter { $0 > 0 }
+        let hertz = points.compactMap(\.gridHz).filter { $0 > 0 }
+        Card(title: "Grid quality") {
+            if volts.count > 1, let vLow = volts.min(), let vHigh = volts.max() {
+                HStack(alignment: .top) {
+                    GridStat(title: "Voltage", value: "\(Int(vLow.rounded())) – \(Int(vHigh.rounded())) V")
+                    Spacer()
+                    if let hLow = hertz.min(), let hHigh = hertz.max() {
+                        GridStat(title: "Frequency",
+                                 value: hLow.formatted(.number.precision(.fractionLength(2))) + " – "
+                                     + hHigh.formatted(.number.precision(.fractionLength(2))) + " Hz")
+                    }
+                }
+                GridVoltageChart(points: points)
+                    .frame(height: 110)
+            } else {
+                Text("No samples yet")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+private struct GridStat: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(verbatim: title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(verbatim: value)
+                .font(.callout.weight(.semibold))
+        }
+    }
+}
+
+private struct GridVoltageChart: View {
+    let points: [HistoryPoint]
+
+    var body: some View {
+        let slim = points.decimated(to: 500).filter { ($0.gridV ?? 0) > 0 }
+        Chart(slim, id: \.ts) { point in
+            LineMark(
+                x: .value("Time" as String, point.date),
+                y: .value("V" as String, point.gridV ?? 0)
+            )
+            .foregroundStyle(.indigo)
+            .lineStyle(StrokeStyle(lineWidth: 1.2))
+        }
+        // Mains voltage lives within a few volts; a zero-based axis would hide that.
+        .chartYScale(domain: .automatic(includesZero: false))
+        .chartYAxisLabel("V")
     }
 }
 
