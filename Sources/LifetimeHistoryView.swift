@@ -18,6 +18,8 @@ struct LifetimeHistoryView: View {
         var id: Date { month }
         var gap: Double? { charger.map { $0 - logged } }
         var title: String { month.formatted(.dateTime.month(.abbreviated).year()) }
+        // The chart squeezes twelve of these side by side; the table has room for the year.
+        var short: String { month.formatted(.dateTime.month(.abbreviated)) }
     }
 
     var body: some View {
@@ -28,12 +30,12 @@ struct LifetimeHistoryView: View {
                         Chart {
                             ForEach(months) { m in
                                 if let charger = m.charger {
-                                    BarMark(x: .value("Month" as String, m.title),
+                                    BarMark(x: .value("Month" as String, m.short),
                                             y: .value("kWh" as String, charger / 1000))
                                         .foregroundStyle(by: .value("Source" as String, "Charger"))
                                         .position(by: .value("Source" as String, "Charger"))
                                 }
-                                BarMark(x: .value("Month" as String, m.title),
+                                BarMark(x: .value("Month" as String, m.short),
                                         y: .value("kWh" as String, m.logged / 1000))
                                     .foregroundStyle(by: .value("Source" as String, "Logged here"))
                                     .position(by: .value("Source" as String, "Logged here"))
