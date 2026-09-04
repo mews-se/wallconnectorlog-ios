@@ -13,11 +13,21 @@ struct SessionsView: View {
             Group {
                 if !sessions.isEmpty {
                     List {
-                        ForEach(grouped, id: \.0) { month, rows in
-                            Section(month) {
-                                ForEach(rows) { session in
+                        ForEach(grouped) { group in
+                            Section {
+                                ForEach(group.rows) { session in
                                     NavigationLink(value: session) {
                                         SessionRow(session: session)
+                                    }
+                                }
+                            } header: {
+                                // The month's total sits in the header, so the
+                                // list doubles as a monthly summary.
+                                HStack {
+                                    Text(verbatim: group.title)
+                                    Spacer()
+                                    if let total = group.totalWh {
+                                        Text(verbatim: Fmt.kwh(total))
                                     }
                                 }
                             }
@@ -44,8 +54,18 @@ struct SessionsView: View {
         }
     }
 
+    struct MonthGroup: Identifiable {
+        let title: String
+        let rows: [ChargeSession]
+        // nil for the open session's own group - its energy is still growing
+        var totalWh: Double? {
+            rows.contains(where: \.open) ? nil : rows.reduce(0) { $0 + ($1.energyWh ?? 0) }
+        }
+        var id: String { title }
+    }
+
     // Newest first from the server; group into month sections for scanning.
-    private var grouped: [(String, [ChargeSession])] {
+    private var grouped: [MonthGroup] {
         var order: [String] = []
         var buckets: [String: [ChargeSession]] = [:]
         for session in sessions {
@@ -55,7 +75,7 @@ struct SessionsView: View {
             if buckets[key] == nil { order.append(key) }
             buckets[key, default: []].append(session)
         }
-        return order.map { ($0, buckets[$0] ?? []) }
+        return order.map { MonthGroup(title: $0, rows: buckets[$0] ?? []) }
     }
 
     private func load() async {
