@@ -17,8 +17,12 @@ WallConnectorLog is a sibling of [EVLog](https://github.com/mews-se/evlog-ios), 
 developer's TeslaMate companion — one app for the car, one for the charger, built the same way:
 your own server, no accounts, no cloud.
 
-The app is not on the App Store yet — this repository holds the work in progress. New work
-gathers on `dev`, and `main` will hold store builds once there are any.
+[Download it on the App Store](https://apps.apple.com/app/wallconnectorlog/id6807546205) — free,
+iOS 18 or later. Every version that reaches the App Store gets a
+[tag and a release](https://github.com/mews-se/wallconnectorlog-ios/releases) here. `main` holds
+the build most recently sent to Apple — normally the one in the store, marked by the latest tag —
+while new work gathers on `dev`. To build what is in the store, start from the latest tag; for
+how, see [Building](#building).
 
 [Privacy policy](https://mews-se.github.io/wallconnectorlog-site/privacy/) ·
 [Support](https://mews-se.github.io/wallconnectorlog-site/support/)
