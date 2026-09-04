@@ -141,6 +141,18 @@ struct SessionDetailView: View {
 
     @State private var curve: [HistoryPoint] = []
 
+    // Plugged in without drawing current: what is left of the plugged-in time
+    // once the charging time is taken out, and how big a part of it that is.
+    private var idleS: Int? {
+        guard let plugged = session.durationS, let charging = session.chargeS else { return nil }
+        return max(0, plugged - charging)
+    }
+
+    private var idleShare: String {
+        guard let idle = idleS, let plugged = session.durationS, plugged > 0 else { return "–" }
+        return (Double(idle) / Double(plugged)).formatted(.percent.precision(.fractionLength(0)))
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
@@ -151,6 +163,10 @@ struct SessionDetailView: View {
                              value: Fmt.duration(session.durationS), tint: .secondary)
                     StatTile(icon: "bolt.badge.clock", title: "Charging",
                              value: Fmt.duration(session.chargeS), tint: .green)
+                    StatTile(icon: "clock.badge.xmark", title: "Idle",
+                             value: Fmt.duration(idleS), tint: .secondary)
+                    StatTile(icon: "chart.pie", title: "Idle share",
+                             value: idleShare, tint: .secondary)
                     StatTile(icon: "gauge.with.dots.needle.67percent", title: "Peak power",
                              value: Fmt.kw(session.peakPowerW), tint: .orange)
                     StatTile(icon: "thermometer.medium", title: "Peak handle",
