@@ -22,6 +22,8 @@ struct StatTile: View {
     // A second line under the value for a figure that belongs to it, like
     // the cost of an amount of energy.
     var detail: String?
+    // Marks a tile that opens another view when tapped.
+    var opens = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -43,6 +45,13 @@ struct StatTile: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .overlay(alignment: .topTrailing) {
+            if opens {
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
         .padding(14)
         .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 16))
     }

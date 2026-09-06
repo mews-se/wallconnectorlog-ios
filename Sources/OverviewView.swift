@@ -105,7 +105,8 @@ struct OverviewView: View {
                     icon: "wifi",
                     title: live.deviceText("wifi_ssid") ?? "Wi-Fi",
                     value: live.deviceNumber("wifi_rssi").map { "\(Int($0)) dBm" } ?? "–",
-                    tint: wifiTint(live.deviceNumber("wifi_rssi"))
+                    tint: wifiTint(live.deviceNumber("wifi_rssi")),
+                    opens: true
                 )
             }
             .buttonStyle(.plain)
