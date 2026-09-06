@@ -24,8 +24,8 @@ the build most recently sent to Apple — normally the one in the store, marked 
 while new work gathers on `dev`. To build what is in the store, start from the latest tag; for
 how, see [Building](#building).
 
-[Privacy policy](https://mews-se.github.io/wallconnectorlog-site/privacy/) ·
-[Support](https://mews-se.github.io/wallconnectorlog-site/support/)
+[Privacy policy](https://wallconnectorlog.martinstockzell.se/privacy/) ·
+[Support](https://wallconnectorlog.martinstockzell.se/support/)
 
 ## What it does
 
