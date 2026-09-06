@@ -2,4 +2,4 @@ Bug fixes
 
 • The Wi-Fi tile on the overview shows a chevron, so it is clear that it opens the signal history
 
-Full story: https://wcl.martinstockzell.se/changelog/
+Full story: https://wclog.martinstockzell.se/changelog/
