@@ -71,7 +71,7 @@ struct AboutView: View {
 
                 LinkRow(icon: "gift", title: "Donate",
                         detail: "If you feel like giving back",
-                        url: "https://wallconnectorlog.martinstockzell.se/donate/")
+                        url: "https://wcl.martinstockzell.se/donate/")
             } header: {
                 Text("Open source")
             } footer: {
