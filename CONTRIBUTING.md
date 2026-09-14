@@ -53,6 +53,9 @@ Typing demo in the server field gives you a full set of example data to click ag
 Keep commits focused. Subject in the imperative, and a body explaining why when the why is not
 obvious from the diff.
 
+If what you found is a security problem, keep it out of the issue tracker: use "Report a
+vulnerability" under the Security tab instead. SECURITY.md has the details.
+
 ## Strings
 
 All user-facing text is English only and lives as plain literals in the views — the app carries

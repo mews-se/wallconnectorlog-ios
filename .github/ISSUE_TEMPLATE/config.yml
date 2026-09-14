@@ -6,3 +6,6 @@ contact_links:
   - name: The WallConnectorLog server itself
     url: https://github.com/mews-se/wallconnectorlog
     about: Problems with the logging, the derived sessions or the database belong there, not here.
+  - name: Security problem
+    url: https://github.com/mews-se/wallconnectorlog-ios/security/advisories/new
+    about: Anything that could expose your server or its data goes through GitHub's private report, not a public issue.
