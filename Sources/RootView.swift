@@ -4,23 +4,28 @@ struct RootView: View {
     @AppStorage("serverURL") private var serverURL = ""
 
     var body: some View {
-        if let api = Server.make(serverURL) {
-            TabView {
-                Tab("Overview", systemImage: "gauge.with.dots.needle.50percent") {
-                    OverviewView(api: api)
+        Group {
+            if let api = Server.make(serverURL) {
+                TabView {
+                    Tab("Overview", systemImage: "gauge.with.dots.needle.50percent") {
+                        OverviewView(api: api)
+                    }
+                    Tab("Sessions", systemImage: "bolt.fill") {
+                        SessionsView(api: api)
+                    }
+                    Tab("Statistics", systemImage: "chart.bar.fill") {
+                        StatsView(api: api)
+                    }
+                    Tab("Settings", systemImage: "gearshape.fill") {
+                        SettingsView()
+                    }
                 }
-                Tab("Sessions", systemImage: "bolt.fill") {
-                    SessionsView(api: api)
-                }
-                Tab("Statistics", systemImage: "chart.bar.fill") {
-                    StatsView(api: api)
-                }
-                Tab("Settings", systemImage: "gearshape.fill") {
-                    SettingsView()
-                }
+            } else {
+                OnboardingView()
             }
-        } else {
-            OnboardingView()
+        }
+        .onChange(of: serverURL, initial: true) {
+            WidgetBridge.mirror(serverURL: serverURL)
         }
     }
 }

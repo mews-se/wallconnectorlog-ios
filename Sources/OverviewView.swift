@@ -165,6 +165,7 @@ struct OverviewView: View {
             let fresh = try await api.live()
             async let points = api.history(hours: chartHours)
             live = fresh
+            WidgetBridge.refresh(with: fresh)
             history = (try? await points) ?? history
             reachable = true
             error = nil

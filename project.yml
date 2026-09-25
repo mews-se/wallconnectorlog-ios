@@ -42,3 +42,48 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
         NSLocalNetworkUsageDescription: WallConnectorLog reads charging data from your WallConnectorLog server on the local network.
+    entitlements:
+      path: Resources/WallConnectorLog.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.se.mews.wallconnectorlog
+    dependencies:
+      - target: WallConnectorLogWidget
+        embed: true
+  # The home-screen widget shares the models, the API client, the formatting
+  # and the demo with the app; the server address reaches it through the group.
+  WallConnectorLogWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - Widget
+      - Sources/Models.swift
+      - Sources/APIClient.swift
+      - Sources/Format.swift
+      - Sources/Demo.swift
+      - Sources/WidgetBridge.swift
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: se.mews.wallconnectorlog.widget
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.1"
+        CURRENT_PROJECT_VERSION: "1"
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: Widget/Info.plist
+      properties:
+        # App Store validation wants the display name inside an extension's own
+        # Info.plist; the INFOPLIST_KEY setting is not written into a plist file.
+        CFBundleDisplayName: WallConnectorLog
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+    entitlements:
+      path: Widget/WallConnectorLogWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.se.mews.wallconnectorlog
