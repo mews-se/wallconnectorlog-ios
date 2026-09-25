@@ -43,6 +43,18 @@ struct DemoApi: WCLApi {
         v.pcbaTempC = 30.8
         v.mcuTempC = 33.5
         v.evseState = 11
+        v.raw = [
+            "pilot_high_v": .number(6.0),
+            "pilot_low_v": .number(-12.0),
+            "prox_v": .number(0.0),
+            "relay_k1_v": .number(11.9),
+            "relay_k2_v": .number(11.8),
+            "input_thermopile_uv": .number(412),
+            "config_status": .number(5),
+            "evse_not_ready_reasons": .array([]),
+            "current_alerts": .array([]),
+            "uptime_s": .number(Double(172 * 86_400)),
+        ]
         live.vitals = v
         var lt = Lifetime()
         lt.energyWh = 1_842_700
@@ -59,11 +71,15 @@ struct DemoApi: WCLApi {
             "firmware_version": .string("26.26.1"),
             "part_number": .string("1529455-02-F"),
             "serial_number": .string("WC-DEMO-0001"),
+            "git_branch": .string("HEAD"),
             "wifi_ssid": .string("Garage"),
             "wifi_rssi": .number(-61),
             "wifi_snr": .number(28),
+            "wifi_signal_strength": .number(74),
             "wifi_connected": .bool(true),
             "internet": .bool(true),
+            "wifi_infra_ip": .string("192.168.1.40"),
+            "wifi_mac": .string("02:1E:C2:00:00:01"),
         ]
         live.openSession = ChargeSession(
             id: 999, startedAt: sessionStart, endedAt: nil, energyWh: 7_580,

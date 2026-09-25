@@ -21,6 +21,9 @@ struct Vitals: Decodable, Sendable {
     var pcbaTempC: Double? = nil
     var mcuTempC: Double? = nil
     var evseState: Int? = nil
+    // The whole block as the charger sent it, for the technical page: the
+    // typed fields above are the ones the rest of the app reads.
+    var raw: [String: JSONValue] = [:]
 
     enum CodingKeys: String, CodingKey {
         case contactorClosed = "contactor_closed"
@@ -42,6 +45,34 @@ struct Vitals: Decodable, Sendable {
         case mcuTempC = "mcu_temp_c"
         case evseState = "evse_state"
     }
+}
+
+extension Vitals {
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        contactorClosed = try c.decodeIfPresent(Bool.self, forKey: .contactorClosed)
+        vehicleConnected = try c.decodeIfPresent(Bool.self, forKey: .vehicleConnected)
+        sessionS = try c.decodeIfPresent(Int.self, forKey: .sessionS)
+        sessionEnergyWh = try c.decodeIfPresent(Double.self, forKey: .sessionEnergyWh)
+        gridV = try c.decodeIfPresent(Double.self, forKey: .gridV)
+        gridHz = try c.decodeIfPresent(Double.self, forKey: .gridHz)
+        vehicleCurrentA = try c.decodeIfPresent(Double.self, forKey: .vehicleCurrentA)
+        voltageA = try c.decodeIfPresent(Double.self, forKey: .voltageA)
+        voltageB = try c.decodeIfPresent(Double.self, forKey: .voltageB)
+        voltageC = try c.decodeIfPresent(Double.self, forKey: .voltageC)
+        currentA = try c.decodeIfPresent(Double.self, forKey: .currentA)
+        currentB = try c.decodeIfPresent(Double.self, forKey: .currentB)
+        currentC = try c.decodeIfPresent(Double.self, forKey: .currentC)
+        currentN = try c.decodeIfPresent(Double.self, forKey: .currentN)
+        handleTempC = try c.decodeIfPresent(Double.self, forKey: .handleTempC)
+        pcbaTempC = try c.decodeIfPresent(Double.self, forKey: .pcbaTempC)
+        mcuTempC = try c.decodeIfPresent(Double.self, forKey: .mcuTempC)
+        evseState = try c.decodeIfPresent(Int.self, forKey: .evseState)
+        raw = try decoder.singleValueContainer().decode([String: JSONValue].self)
+    }
+
+    func number(_ key: String) -> Double? { raw[key]?.number }
+    func text(_ key: String) -> String? { raw[key]?.text }
 }
 
 struct Lifetime: Decodable, Sendable {

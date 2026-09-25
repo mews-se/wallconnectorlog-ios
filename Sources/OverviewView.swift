@@ -139,10 +139,25 @@ struct OverviewView: View {
             live.deviceText("part_number"),
             live.deviceText("serial_number"),
         ].compactMap(\.self)
-        return Text(verbatim: parts.joined(separator: " · "))
-            .font(.caption2)
-            .foregroundStyle(.tertiary)
-            .padding(.bottom, 8)
+        return NavigationLink {
+            TechnicalView(api: api)
+        } label: {
+            VStack(spacing: 4) {
+                Text(verbatim: parts.joined(separator: " · "))
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                HStack(spacing: 3) {
+                    Text("Technical information")
+                    Image(systemName: "chevron.right")
+                        .font(.caption2)
+                }
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.tint)
+            }
+        }
+        .buttonStyle(.plain)
+        .padding(.bottom, 8)
     }
 
     private func load() async {
