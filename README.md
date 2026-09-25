@@ -35,7 +35,10 @@ and the running session. Tiles for phase currents and voltages, handle and elect
 temperatures, the charger's Wi-Fi signal and the grid; a power chart over the last day, week or
 month with a grid quality card beneath it; and the lifetime counters, with a comparison of the
 charger's own energy counter against what the server logged, month by month. The Wi-Fi tile opens
-the signal history.
+the signal history, and the firmware line at the bottom opens a technical page with everything the
+charger reports, as it reports it: pilot and proximity voltages, the relay coils, the thermopile on
+the input terminals, config status, not-ready reasons and alert codes, the network details and the
+grid-compliance checksums.
 
 **Sessions** — the real charge sessions the server has derived, month by month with each month's
 total, each with energy, time plugged in, charging time, idle time, peak power, peak handle
@@ -53,6 +56,11 @@ every energy figure.
 Grafana address, followed automatically when Grafana runs next to the server; the price per kWh;
 and diagnostics: the age of the last reading, the server's clock against the phone's and the last
 poll error.
+
+**Widget** — a small and a medium home-screen widget with what the charger is doing, the power
+while charging or the latest session's energy otherwise, and how old the reading is. The medium one
+adds the session time, or the Wi-Fi signal while nothing charges, the handle temperature and the
+grid voltage. It refreshes on WidgetKit's schedule and whenever the app itself sees the state move.
 
 **Demo mode** — with no server configured the app starts with a hint: type `demo` in the server
 field and every screen runs on built-in example data, so all of the above can be tried before
@@ -86,7 +94,9 @@ brew install xcodegen
 xcodegen generate
 ```
 
-iOS 18 or later, iPhone only.
+iOS 18 or later, iPhone only. The widget and the app share an App Group,
+`group.se.mews.wallconnectorlog`, declared in `project.yml` and read in `Sources/WidgetBridge.swift`;
+if Xcode cannot register that group under your team, rename it in both places.
 
 That is enough to build and run it in the simulator. To put it on your own iPhone, change
 `DEVELOPMENT_TEAM` in `project.yml` first — the identifier in the file is mine, and Xcode will not

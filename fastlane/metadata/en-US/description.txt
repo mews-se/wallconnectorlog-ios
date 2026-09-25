@@ -8,6 +8,7 @@ LIVE
 • Phase currents and voltages, handle and electronics temperatures, the charger's Wi-Fi signal and the grid readings
 • A power chart over the last day, week or month, and the grid's voltage and frequency over the same span
 • The charger's Wi-Fi signal over time, one tap from the tile
+• A technical page with everything the charger reports, as it reports it: pilot and proximity voltages, relay coils, the thermopile on the input terminals, alert codes and network details
 
 SESSIONS
 • The real charge sessions the server has derived — month by month, every plug-in, with each month's total
@@ -24,6 +25,9 @@ STATISTICS
 LIFETIME
 • The counters the charger has kept since it was installed: energy delivered, charging time, charge starts, connector and contactor cycles, thermal foldbacks and uptime
 • The charger's own energy counter against what the server logged, month by month, so a gap in logging shows
+
+WIDGET
+• A small and a medium home-screen widget: what the charger is doing, the power while charging or the latest session's energy, and how old the reading is
 
 GRAFANA AND DIAGNOSTICS
 • Your server's Grafana dashboard one tap away, also when it sits behind a name of its own

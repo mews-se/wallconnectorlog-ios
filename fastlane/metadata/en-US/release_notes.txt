@@ -1,5 +1,6 @@
-Bug fixes
+What's new
 
-• The Wi-Fi tile on the overview shows a chevron, so it is clear that it opens the signal history
+• A technical page with everything the charger reports, opened from the firmware line at the bottom of the overview
+• A home-screen widget in two sizes: what the charger is doing, the power while charging or the latest session's energy, and how old the reading is
 
 Full story: https://wclog.martinstockzell.se/changelog/
