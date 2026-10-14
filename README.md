@@ -34,7 +34,9 @@ is moving, with the state the charger reports, power while charging, the phases 
 and the running session. Tiles for phase currents and voltages, handle and electronics
 temperatures, the charger's Wi-Fi signal and the grid; a power chart over the last day, week or
 month with a grid quality card beneath it; and the lifetime counters, with a comparison of the
-charger's own energy counter against what the server logged, month by month. The Wi-Fi tile opens
+charger's own energy counter against what the server logged, month by month. From a server that
+prices sessions at the spot price, a tile shows the price this quarter hour and, while a car is
+plugged in, what the session has cost so far. The Wi-Fi tile opens
 the signal history, and the firmware line at the bottom opens a technical page with everything the
 charger reports, as it reports it: pilot and proximity voltages, the relay coils, the thermopile on
 the input terminals, config status, not-ready reasons and alert codes, the network details and the
@@ -42,20 +44,22 @@ grid-compliance checksums.
 
 **Sessions** — the real charge sessions the server has derived, month by month with each month's
 total, each with energy, time plugged in, charging time, idle time, peak power, peak handle
-temperature and average grid voltage, and power, temperature and phase-current curves. The list
+temperature and average grid voltage, what it cost at the spot price when the server prices
+sessions, and power, temperature and phase-current curves. The list
 exports as CSV through the share sheet. This is the part a phone app cannot do on its own: the
 charger keeps no history, so an app that only samples while it is open can never show a truthful
 list. The server can, and does.
 
 **Statistics** — totals for the week, month, year or all time, energy per day for the last 30 days
 and per month for the last year, and the records: largest session, longest charge, highest power,
-average charging power and the idle share. With a price per kWh in Settings, cost sits next to
-every energy figure.
+average charging power and the idle share. From a server that prices sessions at the spot price,
+what each period cost sits under its energy, in kronor; with any other server, a price per kWh in
+Settings does the same.
 
 **Settings** — the server address, on your own network or behind an HTTPS name; an optional
-Grafana address, followed automatically when Grafana runs next to the server; the price per kWh;
-and diagnostics: the age of the last reading, the server's clock against the phone's and the last
-poll error.
+Grafana address, followed automatically when Grafana runs next to the server; the price per kWh,
+for servers that do not price sessions themselves; and diagnostics: the age of the last reading,
+the server's version, its clock against the phone's and the last poll error.
 
 **Widget** — a small and a medium home-screen widget with what the charger is doing, the power
 while charging or the latest session's energy otherwise, and how old the reading is. The medium one
@@ -71,8 +75,9 @@ anything is set up.
 - A running [WallConnectorLog](https://github.com/mews-se/wallconnectorlog) server — two files,
   `docker-compose.yml` and `.env`, are the whole install; the README over there walks through it
 - The server reachable from your phone, by default on port `4680`; server 1.2 or later for the
-  per-session curves, the Wi-Fi history and the counter comparison — everything else works with
-  any version
+  per-session curves, the Wi-Fi history and the counter comparison, and 1.3 or later with
+  `WC_PRICE_AREA` set to a Swedish price area for spot prices — everything else works with any
+  version
 
 The server address is the only thing the app asks for. Until one is in place the demo is a typed
 word away.

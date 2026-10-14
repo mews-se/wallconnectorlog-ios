@@ -9,10 +9,12 @@ LIVE
 • A power chart over the last day, week or month, and the grid's voltage and frequency over the same span
 • The charger's Wi-Fi signal over time, one tap from the tile
 • A technical page with everything the charger reports, as it reports it: pilot and proximity voltages, relay coils, the thermopile on the input terminals, alert codes and network details
+• In Sweden, the spot price this quarter hour and what the running session has cost so far, from a server that prices sessions
 
 SESSIONS
 • The real charge sessions the server has derived — month by month, every plug-in, with each month's total
 • Energy, time plugged in, charging time, idle time, peak power, peak handle temperature and average grid voltage for each session
+• What each session cost at the spot price, with its price area
 • Power, temperature and phase-current curves for every session
 • The whole list as a CSV file, through the share sheet
 
@@ -20,7 +22,7 @@ STATISTICS
 • Totals for the week, the month, the year or all time: energy, sessions, charging time and average power
 • Energy per day for the last 30 days and per month for the last year
 • Records: the largest session, the longest charge, the highest power, and how much of the plugged-in time went idle
-• Give it your price per kWh and every total and session shows its cost
+• What each period cost at the spot price; with a server that does not price sessions, give it your price per kWh instead
 
 LIFETIME
 • The counters the charger has kept since it was installed: energy delivered, charging time, charge starts, connector and contactor cycles, thermal foldbacks and uptime
@@ -31,14 +33,14 @@ WIDGET
 
 GRAFANA AND DIAGNOSTICS
 • Your server's Grafana dashboard one tap away, also when it sits behind a name of its own
-• The age of the last reading, the server's clock against the phone's, and the last poll error, so a stalled or drifting server is visible
+• The age of the last reading, the server's version, its clock against the phone's, and the last poll error, so a stalled or drifting server is visible
 
 TRY IT FIRST
 • No server yet? Type demo in the server field and every screen runs on built-in example data
 
 WHAT YOU NEED
 • A WallConnectorLog server — two files, docker-compose.yml and .env, are the whole install
-• The server reachable from your phone; server 1.2 or later for the per-session curves and the histories
+• The server reachable from your phone; server 1.2 or later for the per-session curves and the histories, 1.3 or later with a Swedish price area set for spot prices
 
 WallConnectorLog is free and open source under the MIT licence — no ads, no tracking, no analytics, nothing to buy. It is a sibling of EVLog, the same developer's TeslaMate companion.
 

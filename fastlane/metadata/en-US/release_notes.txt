@@ -1,6 +1,7 @@
 What's new
 
-• A technical page with everything the charger reports, opened from the firmware line at the bottom of the overview
-• A home-screen widget in two sizes: what the charger is doing, the power while charging or the latest session's energy, and how old the reading is
+• What each charge cost at the spot price, from a server that prices sessions (WallConnectorLog 1.3 or later, Swedish price areas)
+• The spot price right now on the overview, and what the running session has cost so far
+• The server's version under Diagnostics in Settings
 
 Full story: https://wclog.martinstockzell.se/changelog/
