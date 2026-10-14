@@ -69,6 +69,17 @@ enum Fmt {
         return amount.formatted(.currency(code: code).precision(.fractionLength(0...2)))
     }
 
+    // The spot price comes from the Swedish market, so it is kronor on every
+    // phone, whatever currency the phone uses for the price typed by hand.
+    static func sek(_ amount: Double) -> String {
+        amount.formatted(.currency(code: "SEK").precision(.fractionLength(2)))
+    }
+
+    static func sekPerKwh(_ price: Double?) -> String {
+        guard let price else { return "–" }
+        return sek(price) + "/kWh"
+    }
+
     static func days(_ s: Int?) -> String {
         guard let s else { return "–" }
         return "\(s / 86_400) days"

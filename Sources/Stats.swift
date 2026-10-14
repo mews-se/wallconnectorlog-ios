@@ -12,6 +12,8 @@ struct SessionStats {
         var count = 0
         var chargingS = 0
         var pluggedS = 0
+        var spotSek = 0.0
+        var spotPriced = 0
 
         var averagePowerW: Double? {
             chargingS > 0 ? energyWh / (Double(chargingS) / 3600) : nil
@@ -48,9 +50,18 @@ struct SessionStats {
             t.count += 1
             t.chargingS += s.chargeS ?? 0
             t.pluggedS += s.durationS ?? 0
+            if let spot = s.spotSek {
+                t.spotSek += spot
+                t.spotPriced += 1
+            }
         }
         return t
     }
+
+    // A server that prices sessions at the spot price has priced at least one;
+    // its cost then replaces the price per kWh typed in Settings, so the two
+    // never end up in the same sum.
+    var pricedBySpot: Bool { sessions.contains { $0.spotSek != nil } }
 
     // One bar per calendar day for the last `days` days, zero where nothing
     // was charged, so the chart keeps its time axis honest.

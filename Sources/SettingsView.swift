@@ -74,7 +74,11 @@ struct SettingsView: View {
                 } header: {
                     Text("Cost")
                 } footer: {
-                    Text("Your price per kWh, in your own currency. Set it and the statistics and session details show what each charge cost; leave it at 0 to hide cost.")
+                    if let area = diagnostics?.live.spot?.area {
+                        Text(verbatim: "This server prices every session at the spot price for \(area), so the statistics and session details show that cost instead. The price here is used with servers that do not.")
+                    } else {
+                        Text("Your price per kWh, in your own currency. Set it and the statistics and session details show what each charge cost; leave it at 0 to hide cost.")
+                    }
                 }
                 Section {
                     if let d = diagnostics {
@@ -82,6 +86,10 @@ struct SettingsView: View {
                         LabeledContent("Last reading") {
                             Text(verbatim: Fmt.age(max(0, age)) + " ago")
                                 .foregroundStyle(age > Self.staleAfter ? .orange : .secondary)
+                        }
+                        LabeledContent("Server version") {
+                            Text(verbatim: d.live.version ?? "Older than 1.3.1")
+                                .foregroundStyle(.secondary)
                         }
                         LabeledContent("Server clock") {
                             Text(verbatim: clockText(d.serverClock))

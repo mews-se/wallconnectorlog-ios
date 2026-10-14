@@ -24,7 +24,7 @@ struct StatsView: View {
                             }
                         }
                         .pickerStyle(.segmented)
-                        totals(stats.totals(period))
+                        totals(stats.totals(period), bySpot: stats.pricedBySpot)
                         Card(title: "Energy per day, last 30 days") {
                             EnergyBars(points: stats.perDay(days: 30).map { ($0.day, $0.energyWh) }, unit: .day)
                                 .frame(height: 150)
@@ -52,15 +52,27 @@ struct StatsView: View {
         }
     }
 
-    private func totals(_ t: SessionStats.Totals) -> some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
-            StatTile(icon: "bolt.fill", title: "Energy", value: Fmt.kwh(t.energyWh), tint: .green, valueTint: .green,
-                     detail: pricePerKwh > 0 ? Fmt.money(t.energyWh / 1000 * pricePerKwh) : nil)
-            StatTile(icon: "list.number", title: "Sessions", value: Fmt.count(t.count), tint: .secondary)
-            StatTile(icon: "bolt.badge.clock", title: "Charging time", value: Fmt.wholeHours(t.chargingS), tint: .green)
-            StatTile(icon: "gauge.with.dots.needle.67percent", title: "Average power",
-                     value: Fmt.kw(t.averagePowerW), tint: .orange)
+    private func totals(_ t: SessionStats.Totals, bySpot: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+                StatTile(icon: "bolt.fill", title: "Energy", value: Fmt.kwh(t.energyWh), tint: .green, valueTint: .green,
+                         detail: cost(t, bySpot: bySpot))
+                StatTile(icon: "list.number", title: "Sessions", value: Fmt.count(t.count), tint: .secondary)
+                StatTile(icon: "bolt.badge.clock", title: "Charging time", value: Fmt.wholeHours(t.chargingS), tint: .green)
+                StatTile(icon: "gauge.with.dots.needle.67percent", title: "Average power",
+                         value: Fmt.kw(t.averagePowerW), tint: .orange)
+            }
+            if bySpot, t.spotPriced < t.count {
+                Text(verbatim: "\(t.count - t.spotPriced) of \(t.count) sessions have no spot price and are left out of the cost.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
+    }
+
+    private func cost(_ t: SessionStats.Totals, bySpot: Bool) -> String? {
+        if bySpot { return t.spotPriced > 0 ? Fmt.sek(t.spotSek) + " spot" : nil }
+        return pricePerKwh > 0 ? Fmt.money(t.energyWh / 1000 * pricePerKwh) : nil
     }
 
     private func records(_ stats: SessionStats) -> some View {

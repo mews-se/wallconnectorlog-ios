@@ -84,8 +84,11 @@ struct DemoApi: WCLApi {
         live.openSession = ChargeSession(
             id: 999, startedAt: sessionStart, endedAt: nil, energyWh: 7_580,
             durationS: now - sessionStart, chargeS: now - sessionStart - 90,
-            peakPowerW: 11_090, peakHandleC: 24.9, isOpen: 1, avgGridV: 230.2
+            peakPowerW: 11_090, peakHandleC: 24.9, isOpen: 1, avgGridV: 230.2,
+            spotSek: 6.97, spotArea: "SE3"
         )
+        live.spot = SpotPrice(area: "SE3", sekPerKwh: 0.92)
+        live.version = "Demo"
         return live
     }
 
@@ -108,7 +111,9 @@ struct DemoApi: WCLApi {
                 energyWh: energy, durationS: duration,
                 chargeS: Int(Double(duration) * 0.93),
                 peakPowerW: 10_900 + n * 250, peakHandleC: 22 + n * 6,
-                isOpen: 0, avgGridV: 229 + n * 3
+                isOpen: 0, avgGridV: 229 + n * 3,
+                // Between 0.35 and 1.75 kr/kWh, where a Swedish spot price mostly stays.
+                spotSek: energy / 1000 * (0.35 + noise(id + 7) * 1.4), spotArea: "SE3"
             ))
             day += n < 0.33 ? 2 : 1
             id -= 1

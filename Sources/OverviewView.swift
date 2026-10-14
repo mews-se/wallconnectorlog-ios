@@ -35,6 +35,9 @@ struct OverviewView: View {
                                 .foregroundStyle(.orange)
                         }
                         tiles(live)
+                        if let spot = live.spot {
+                            spotTile(spot, session: live.openSession)
+                        }
                         PowerChartCard(points: history, hours: $chartHours)
                             .onChange(of: chartHours) { Task { await loadHistory() } }
                         GridQualityCard(points: history)
@@ -117,6 +120,18 @@ struct OverviewView: View {
                 tint: .indigo
             )
         }
+    }
+
+    // The price this quarter hour, and while a car is plugged in what the
+    // session has cost so far. The server updates that figure every five minutes.
+    private func spotTile(_ spot: SpotPrice, session: ChargeSession?) -> some View {
+        StatTile(
+            icon: "chart.line.uptrend.xyaxis",
+            title: "Spot price" + (spot.area.map { " " + $0 } ?? ""),
+            value: Fmt.sekPerKwh(spot.sekPerKwh),
+            tint: .yellow,
+            detail: session?.spotSek.map { Fmt.sek($0) + " so far" }
+        )
     }
 
     private func phaseTriple(_ a: Double?, _ b: Double?, _ c: Double?, suffix: String, decimals: Int = 1) -> String {

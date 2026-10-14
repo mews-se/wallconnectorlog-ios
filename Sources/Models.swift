@@ -110,6 +110,10 @@ struct ChargeSession: Decodable, Sendable, Identifiable, Hashable {
     var peakHandleC: Double? = nil
     var isOpen: Int? = nil
     var avgGridV: Double? = nil
+    // Set by a server that prices sessions at the spot price (1.3 and later
+    // with a price area configured); the cost is always in Swedish kronor.
+    var spotSek: Double? = nil
+    var spotArea: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case id
@@ -122,6 +126,8 @@ struct ChargeSession: Decodable, Sendable, Identifiable, Hashable {
         case peakHandleC = "peak_handle_c"
         case isOpen = "is_open"
         case avgGridV = "avg_grid_v"
+        case spotSek = "spot_sek"
+        case spotArea = "spot_area"
     }
 
     var started: Date { Date(timeIntervalSince1970: TimeInterval(startedAt)) }
@@ -255,6 +261,16 @@ struct GrafanaLink: Decodable, Sendable {
     var up: Bool? = nil
 }
 
+struct SpotPrice: Decodable, Sendable {
+    var area: String? = nil
+    var sekPerKwh: Double? = nil
+
+    enum CodingKeys: String, CodingKey {
+        case area
+        case sekPerKwh = "sek_per_kwh"
+    }
+}
+
 struct Live: Decodable, Sendable {
     var ts: Int? = nil
     var ok: Bool? = nil
@@ -266,9 +282,11 @@ struct Live: Decodable, Sendable {
     var openSession: ChargeSession? = nil
     var evseStateText: String? = nil
     var grafana: GrafanaLink? = nil
+    var spot: SpotPrice? = nil
+    var version: String? = nil
 
     enum CodingKeys: String, CodingKey {
-        case ts, ok, error, vitals, lifetime, device, grafana
+        case ts, ok, error, vitals, lifetime, device, grafana, spot, version
         case powerW = "power_w"
         case openSession = "open_session"
         case evseStateText = "evse_state_text"

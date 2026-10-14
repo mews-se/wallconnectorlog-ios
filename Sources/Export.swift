@@ -16,7 +16,7 @@ struct SessionsCSV: Transferable {
     }
 
     var text: String {
-        var lines = ["started,ended,energy_kwh,plugged_in_min,charging_min,peak_power_kw,peak_handle_c,avg_grid_v"]
+        var lines = ["started,ended,energy_kwh,plugged_in_min,charging_min,peak_power_kw,peak_handle_c,avg_grid_v,spot_sek,spot_area"]
         for s in sessions.sorted(by: { $0.startedAt < $1.startedAt }) {
             lines.append([
                 Self.stamp(s.started),
@@ -27,6 +27,8 @@ struct SessionsCSV: Transferable {
                 Self.number(s.peakPowerW.map { $0 / 1000 }, decimals: 2),
                 Self.number(s.peakHandleC.flatMap { $0 > -99 ? $0 : nil }, decimals: 1),
                 Self.number(s.avgGridV, decimals: 1),
+                Self.number(s.spotSek, decimals: 2),
+                s.spotArea ?? "",
             ].joined(separator: ","))
         }
         return lines.joined(separator: "\n") + "\n"

@@ -34,7 +34,8 @@ struct SessionsView: View {
                         }
                     }
                     .navigationDestination(for: ChargeSession.self) { session in
-                        SessionDetailView(api: api, session: session)
+                        SessionDetailView(api: api, session: session,
+                                          pricedBySpot: sessions.contains { $0.spotSek != nil })
                     }
                 } else if let error {
                     ErrorCard(message: error) { Task { await load() } }
@@ -138,6 +139,9 @@ private struct SessionRow: View {
 struct SessionDetailView: View {
     let api: any WCLApi
     let session: ChargeSession
+    // On a server that prices sessions at the spot price, its cost replaces
+    // the price per kWh from Settings, even for a session it could not price.
+    let pricedBySpot: Bool
 
     @AppStorage("pricePerKwh") private var pricePerKwh = 0.0
     @State private var curve: [HistoryPoint] = []
@@ -154,13 +158,21 @@ struct SessionDetailView: View {
         return (Double(idle) / Double(plugged)).formatted(.percent.precision(.fractionLength(0)))
     }
 
+    private var cost: String? {
+        if let spot = session.spotSek {
+            return Fmt.sek(spot) + " spot" + (session.spotArea.map { " " + $0 } ?? "")
+        }
+        if pricedBySpot { return nil }
+        return pricePerKwh > 0 ? Fmt.money((session.energyWh ?? 0) / 1000 * pricePerKwh) : nil
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
                 LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
                     StatTile(icon: "bolt.fill", title: "Energy",
                              value: Fmt.kwh(session.energyWh), tint: .green, valueTint: .green,
-                             detail: pricePerKwh > 0 ? Fmt.money((session.energyWh ?? 0) / 1000 * pricePerKwh) : nil)
+                             detail: cost)
                     StatTile(icon: "clock", title: "Plugged in",
                              value: Fmt.duration(session.durationS), tint: .secondary)
                     StatTile(icon: "bolt.badge.clock", title: "Charging",
