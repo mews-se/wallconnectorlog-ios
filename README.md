@@ -45,10 +45,10 @@ grid-compliance checksums.
 **Sessions**: the real charge sessions the server has derived, month by month with each month's
 total, each with energy, time plugged in, charging time, idle time, peak power, peak handle
 temperature and average grid voltage, what it cost at the spot price when the server prices
-sessions, and power, temperature and phase-current curves. The list
-exports as CSV through the share sheet. This is the part a phone app cannot do on its own: the
-charger keeps no history, so an app that only samples while it is open can never show a truthful
-list. The server can, and does.
+sessions or at the price per kWh in Settings otherwise, and power, temperature and phase-current
+curves. The list exports as CSV through the share sheet. This is the part a phone app cannot do on
+its own: the charger keeps no history, so an app that only samples while it is open can never show
+a truthful list. The server can, and does.
 
 **Statistics**: totals for the week, month, year or all time, energy per day for the last 30 days
 and per month for the last year, and the records: largest session, longest charge, highest power,
@@ -56,10 +56,11 @@ average charging power and the idle share. From a server that prices sessions at
 what each period cost sits under its energy, in kronor; with any other server, a price per kWh in
 Settings does the same.
 
-**Settings**: the server address, on your own network or behind an HTTPS name; an optional
-Grafana address, followed automatically when Grafana runs next to the server; the price per kWh,
-for servers that do not price sessions themselves; and diagnostics: the age of the last reading,
-the server's version, its clock against the phone's and the last poll error.
+**Settings**: the server address, on your own network or behind an HTTPS name, and a button to
+test it; an optional Grafana address for the Graphs in Grafana link at the foot of the Overview,
+followed automatically when Grafana runs next to the server; the price per kWh, for servers that
+do not price sessions themselves; and diagnostics: the age of the last reading, the server's
+version, its clock against the phone's and the last poll error.
 
 **Widget**: a small and a medium home-screen widget with what the charger is doing, the power
 while charging or the latest session's energy otherwise, and how old the reading is. The medium one
@@ -75,15 +76,17 @@ anything is set up.
 - A running [WallConnectorLog](https://github.com/mews-se/wallconnectorlog) server: two files,
   `docker-compose.yml` and `.env`, are the whole install; the README over there walks through it
 - The server reachable from your phone, by default on port `4680`; server 1.2 or later for the
-  per-session curves, the Wi-Fi history and the counter comparison, and 1.3 or later with
-  `WC_PRICE_AREA` set to a Swedish price area for spot prices; everything else works with any
-  version
+  per-session curves, the Wi-Fi history and the counter comparison, 1.3 or later with
+  `WC_PRICE_AREA` set to a Swedish price area for spot prices, and 1.3.1 or later for the server
+  version under Diagnostics; everything else works with any version
 
 The server address is the only thing the app asks for. Until one is in place the demo is a typed
 word away.
 
 The app allows plain HTTP to your own network: private addresses such as 192.168.x.x and 10.x.x.x,
-`.local` names, and hostnames without a dot. That covers a LAN and a VPN alike.
+`.local` names, and hostnames without a dot. That covers a LAN and a VPN alike, though the app does
+not count Tailscale's 100.x addresses as local, so type one with scheme and port:
+`http://100.x.y.z:4680`.
 
 A public name behind a reverse proxy with a real certificate works as well: type it without a
 scheme and the app uses HTTPS on the standard port. A typed `http://` or `https://` is kept, with
@@ -97,16 +100,20 @@ you run:
 ```
 brew install xcodegen
 xcodegen generate
+open WallConnectorLog.xcodeproj
 ```
 
-iOS 18 or later, iPhone only. The widget and the app share an App Group,
-`group.se.mews.wallconnectorlog`, declared in `project.yml` and read in `Sources/WidgetBridge.swift`;
-if Xcode cannot register that group under your team, rename it in both places.
+It builds with Xcode 27.1 and runs on iOS 18 or later, iPhone only. The widget and the app share an
+App Group, `group.se.mews.wallconnectorlog`, declared for both targets in `project.yml` and read in
+`Sources/WidgetBridge.swift`; if Xcode cannot register that group under your team, rename it in all
+three places.
 
 That is enough to build and run it in the simulator. To put it on your own iPhone, change
 `DEVELOPMENT_TEAM` in `project.yml` first. The identifier in the file is mine, and Xcode will not
-sign for a team you are not a member of. A free Apple ID works: pick Personal Team when Xcode asks.
-Apps signed that way stop launching after seven days and have to be run from Xcode again to renew.
+sign for a team you are not a member of. The bundle identifiers there, `se.mews.wallconnectorlog`
+and `se.mews.wallconnectorlog.widget`, belong to the App Store app, so give both your own prefix.
+A free Apple ID works: pick Personal Team when Xcode asks. Apps signed that way stop launching
+after seven days and have to be run from Xcode again to renew.
 
 ## Licence
 
