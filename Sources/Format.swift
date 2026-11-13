@@ -97,6 +97,11 @@ enum Fmt {
         date.formatted(date: .omitted, time: .shortened)
     }
 
+    static func moment(_ date: Date, withDay: Bool) -> String {
+        guard withDay else { return time(date) }
+        return date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute())
+    }
+
     static func timeRange(_ start: Date, _ end: Date?) -> String {
         guard let end else { return time(start) + " –" }
         return time(start) + " – " + time(end)

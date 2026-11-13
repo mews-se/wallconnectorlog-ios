@@ -191,7 +191,6 @@ struct SessionDetailView: View {
                 if curve.count > 1 {
                     Card(title: "Power") {
                         PowerChart(points: curve)
-                            .frame(height: 150)
                     }
                     Card(title: "Temperature") {
                         TemperatureChart(points: curve)

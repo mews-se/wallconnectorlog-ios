@@ -41,6 +41,7 @@ struct OverviewView: View {
                         PowerChartCard(points: history, hours: $chartHours)
                             .onChange(of: chartHours) { Task { await loadHistory() } }
                         GridQualityCard(points: history)
+                            .id(chartHours)
                         if let lt = live.lifetime {
                             LifetimeCard(lifetime: lt, api: api)
                         }
@@ -344,7 +345,6 @@ private struct GridQualityCard: View {
                     }
                 }
                 GridVoltageChart(points: points)
-                    .frame(height: 110)
             } else {
                 Text("No samples yet")
                     .font(.subheadline)
@@ -372,19 +372,50 @@ private struct GridStat: View {
 private struct GridVoltageChart: View {
     let points: [HistoryPoint]
 
+    @State private var selection: Date?
+    @State private var held: Date?
+
     var body: some View {
         let slim = points.decimated(to: 500).filter { ($0.gridV ?? 0) > 0 }
-        Chart(slim, id: \.ts) { point in
-            LineMark(
-                x: .value("Time" as String, point.date),
-                y: .value("V" as String, point.gridV ?? 0)
-            )
-            .foregroundStyle(.indigo)
-            .lineStyle(StrokeStyle(lineWidth: 1.2))
+        let reading = held.flatMap { slim.nearest(to: $0) }
+        VStack(alignment: .leading, spacing: 8) {
+            ChartReadout(hint: "Drag the chart to read the grid",
+                         reading: reading.map { readout($0, withDay: slim.spansDays) })
+            Chart {
+                ForEach(slim, id: \.ts) { point in
+                    LineMark(
+                        x: .value("Time" as String, point.date),
+                        y: .value("V" as String, point.gridV ?? 0)
+                    )
+                    .foregroundStyle(.indigo)
+                    .lineStyle(StrokeStyle(lineWidth: 1.2))
+                }
+                if let reading {
+                    RuleMark(x: .value("Selected" as String, reading.date))
+                        .foregroundStyle(.secondary.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1))
+                }
+            }
+            .chartXSelection(value: $selection)
+            // Mains voltage lives within a few volts; a zero-based axis would hide that.
+            .chartYScale(domain: .automatic(includesZero: false))
+            .chartYAxisLabel("V")
+            .frame(height: 110)
         }
-        // Mains voltage lives within a few volts; a zero-based axis would hide that.
-        .chartYScale(domain: .automatic(includesZero: false))
-        .chartYAxisLabel("V")
+        .onChange(of: selection) { _, new in
+            if new != nil { held = new }
+        }
+    }
+
+    // Only the voltage is drawn, but each sample has the frequency of the
+    // same moment as well.
+    private func readout(_ point: HistoryPoint, withDay: Bool) -> Text {
+        var text = Text(verbatim: Fmt.moment(point.date, withDay: withDay)).foregroundStyle(.secondary)
+        text = text + Text(verbatim: " · " + Fmt.volts(point.gridV)).foregroundStyle(.indigo)
+        if let hz = point.gridHz, hz > 0 {
+            text = text + Text(verbatim: " · " + hz.formatted(.number.precision(.fractionLength(2))) + " Hz")
+        }
+        return text
     }
 }
 
@@ -425,7 +456,7 @@ private struct PowerChartCard: View {
             }
             if points.count > 1 {
                 PowerChart(points: points)
-                    .frame(height: 150)
+                    .id(hours)
             } else {
                 Text("No samples yet")
                     .font(.subheadline)
@@ -438,24 +469,74 @@ private struct PowerChartCard: View {
 struct PowerChart: View {
     let points: [HistoryPoint]
 
+    // The chart drops its selection when the finger lifts, so the reading
+    // keeps the last one and stays where it was let go.
+    @State private var selection: Date?
+    @State private var held: Date?
+
     var body: some View {
         // A day of 5 s samples is far more than one chart needs.
         let slim = points.decimated(to: 500)
-        Chart(slim, id: \.ts) { point in
-            AreaMark(
-                x: .value("Time" as String, point.date),
-                y: .value("kW" as String, (point.powerW ?? 0) / 1000)
-            )
-            .foregroundStyle(.linearGradient(colors: [.green.opacity(0.35), .green.opacity(0.02)],
-                                             startPoint: .top, endPoint: .bottom))
-            LineMark(
-                x: .value("Time" as String, point.date),
-                y: .value("kW" as String, (point.powerW ?? 0) / 1000)
-            )
-            .foregroundStyle(.green)
-            .lineStyle(StrokeStyle(lineWidth: 1.5))
+        let reading = held.flatMap { slim.nearest(to: $0) }
+        VStack(alignment: .leading, spacing: 8) {
+            ChartReadout(hint: "Drag the chart to read the power",
+                         reading: reading.map { readout($0, withDay: slim.spansDays) })
+            Chart {
+                ForEach(slim, id: \.ts) { point in
+                    AreaMark(
+                        x: .value("Time" as String, point.date),
+                        y: .value("kW" as String, (point.powerW ?? 0) / 1000)
+                    )
+                    .foregroundStyle(.linearGradient(colors: [.green.opacity(0.35), .green.opacity(0.02)],
+                                                     startPoint: .top, endPoint: .bottom))
+                    LineMark(
+                        x: .value("Time" as String, point.date),
+                        y: .value("kW" as String, (point.powerW ?? 0) / 1000)
+                    )
+                    .foregroundStyle(.green)
+                    .lineStyle(StrokeStyle(lineWidth: 1.5))
+                }
+                // Outside the loop, or there is one rule per point.
+                if let reading {
+                    RuleMark(x: .value("Selected" as String, reading.date))
+                        .foregroundStyle(.secondary.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1))
+                }
+            }
+            .chartXSelection(value: $selection)
+            .chartYAxisLabel("kW")
+            .frame(height: 150)
         }
-        .chartYAxisLabel("kW")
+        .onChange(of: selection) { _, new in
+            if new != nil { held = new }
+        }
+    }
+
+    private func readout(_ point: HistoryPoint, withDay: Bool) -> Text {
+        Text(verbatim: Fmt.moment(point.date, withDay: withDay)).foregroundStyle(.secondary)
+            + Text(verbatim: " · " + Fmt.kw(point.powerW)).foregroundStyle(.green)
+    }
+}
+
+// The line over a chart that can be dragged: a hint until the chart has been
+// touched, then what it shows where the finger was.
+struct ChartReadout: View {
+    let hint: String
+    let reading: Text?
+
+    var body: some View {
+        Group {
+            if let reading {
+                reading
+                    .font(.caption.weight(.medium).monospacedDigit())
+            } else {
+                Text(verbatim: hint)
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .lineLimit(1)
+        .minimumScaleFactor(0.8)
     }
 }
 
@@ -464,6 +545,21 @@ extension Array {
         guard count > budget, budget > 0 else { return self }
         let step = Swift.max(count / budget, 1)
         return enumerated().compactMap { $0.offset % step == 0 ? $0.element : nil }
+    }
+}
+
+extension [HistoryPoint] {
+    // The plotted point closest to the finger, so the reading is always one
+    // the chart draws and never something in between.
+    func nearest(to date: Date) -> HistoryPoint? {
+        let target = date.timeIntervalSince1970
+        return self.min { abs(TimeInterval($0.ts) - target) < abs(TimeInterval($1.ts) - target) }
+    }
+
+    // Past a day the same hour comes round again, so the time needs its day.
+    var spansDays: Bool {
+        guard let first, let last else { return false }
+        return last.ts - first.ts > 24 * 3600
     }
 }
 
