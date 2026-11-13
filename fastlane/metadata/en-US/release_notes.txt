@@ -1,7 +1,5 @@
 What's new
 
-• What each charge cost at the spot price, from a server that prices sessions (WallConnectorLog 1.3 or later, Swedish price areas)
-• The spot price right now on the overview, and what the running session has cost so far
-• The server's version under Diagnostics in Settings
+• Drag the Power and Grid quality charts, or a session's power curve, to read the value at any moment
 
 Full story: https://wclog.martinstockzell.se/changelog/

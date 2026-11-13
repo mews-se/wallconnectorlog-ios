@@ -6,7 +6,7 @@ LIVE
 • The grid, the charger and the car in one picture that lights up green where energy is moving, and how many phases carry current
 • Power while charging, the state the charger reports, and the running session
 • Phase currents and voltages, handle and electronics temperatures, the charger's Wi-Fi signal and the grid readings
-• A power chart over the last day, week or month, and the grid's voltage and frequency over the same span
+• A power chart over the last day, week or month, and the grid's voltage and frequency over the same span; drag either one to read the value at any moment
 • The charger's Wi-Fi signal over time, one tap from the tile
 • A technical page with everything the charger reports, as it reports it: pilot and proximity voltages, relay coils, the thermopile on the input terminals, alert codes and network details
 • In Sweden, the spot price this quarter hour and what the running session has cost so far, from a server that prices sessions

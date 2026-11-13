@@ -33,7 +33,8 @@ how, see [Building](#building).
 is moving, with the state the charger reports, power while charging, the phases carrying current
 and the running session. Tiles for phase currents and voltages, handle and electronics
 temperatures, the charger's Wi-Fi signal and the grid; a power chart over the last day, week or
-month with a grid quality card beneath it; and the lifetime counters, with a comparison of the
+month with a grid quality card beneath it, both of which give the time and value under your
+finger as you drag along them; and the lifetime counters, with a comparison of the
 charger's own energy counter against what the server logged, month by month. From a server that
 prices sessions at the spot price, a tile shows the price this quarter hour and, while a car is
 plugged in, what the session has cost so far. The Wi-Fi tile opens
